@@ -23,4 +23,4 @@
 
 | Name | Description |
 | ---- | ----------- |
-| [wpath](https://manual.g1ant.com/link/G1ANT.Addon.UI/G1ANT.Addon.UI/Structures/WPathStructure.md) |  |
+| [wpath](https://manual.g1ant.com/link/G1ANT.Addon.UI/G1ANT.Addon.UI/Structures/WPathStructure.md) | This structure stores WPath information of UI elements and is used by the `ui.` family of commands, `waitfor.ui` included |
