@@ -93,7 +93,15 @@ namespace G1ANT.Addon.UI
 
         public void Click()
         {
-            if (automationElement.TryGetClickablePoint(out var pt))
+            if (automationElement.TryGetCurrentPattern(InvokePattern.Pattern, out var invokePattern))
+            {
+                (invokePattern as InvokePattern)?.Invoke();
+            }
+            else if (automationElement.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var selectionPattern))
+            {
+                (selectionPattern as SelectionItemPattern)?.Select();
+            }
+            else if (automationElement.TryGetClickablePoint(out var pt))
             {
                 var tempPos = MouseWin32.GetPhysicalCursorPosition();
                 var currentPos = new Point(tempPos.X, tempPos.Y);
@@ -114,14 +122,6 @@ namespace G1ANT.Addon.UI
                     MouseWin32.MouseEvent(arg.dwFlags, arg.dx, arg.dy, arg.dwData);
                     Thread.Sleep(10);
                 }
-            }
-            else if (automationElement.TryGetCurrentPattern(InvokePattern.Pattern, out var invokePattern))
-            {
-                (invokePattern as InvokePattern)?.Invoke();
-            }
-            else if (automationElement.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var selectionPattern))
-            {
-                (selectionPattern as SelectionItemPattern)?.Select();
             }
         }
 
