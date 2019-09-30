@@ -1,10 +1,11 @@
 ﻿using System;
-using CodePlex.XPathParser;
 using System.Windows.Automation;
 using System.Collections.Generic;
-using G1ANT.Language;
 using System.Drawing;
 using System.Threading;
+using CodePlex.XPathParser;
+using G1ANT.Language;
+using G1ANT.Addon.UI.ExtensionMethods;
 
 namespace G1ANT.Addon.UI
 {
@@ -174,12 +175,7 @@ namespace G1ANT.Addon.UI
 
         public string GetText()
         {
-            //if (automationElement.Current.NativeWindowHandle != 0)
-            //{
-            //    IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
-            //    return RobotWin32.GetWindowText(wndHandle);
-            //}
-            return automationElement.Current.Name;
+            return automationElement.GetText();
         }
     }
 }

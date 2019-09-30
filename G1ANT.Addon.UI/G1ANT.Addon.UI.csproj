@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Api\UIElement.cs" />
     <Compile Include="Api\XPathUIElementBuilder.cs" />
+    <Compile Include="ExtensionMethods\AutomationExtensions.cs" />
     <Compile Include="MainAddon.cs" />
     <Compile Include="Panels\UIControlsPanel.cs">
       <SubType>UserControl</SubType>
