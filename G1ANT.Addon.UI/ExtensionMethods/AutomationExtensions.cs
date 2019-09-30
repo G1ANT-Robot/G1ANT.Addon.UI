@@ -6,9 +6,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
     {
         public static string GetText(this AutomationElement element)
         {
-            object patternObj;
-
-            if (element.TryGetCurrentPattern(ValuePattern.Pattern, out patternObj))
+            if (element.TryGetCurrentPattern(ValuePattern.Pattern, out object patternObj))
             {
                 var valuePattern = (ValuePattern)patternObj;
                 return valuePattern.Current.Value;
