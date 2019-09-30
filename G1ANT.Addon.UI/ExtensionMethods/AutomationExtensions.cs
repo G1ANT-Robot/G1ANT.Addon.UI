@@ -7,6 +7,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
         public static string GetText(this AutomationElement element)
         {
             object patternObj;
+
             if (element.TryGetCurrentPattern(ValuePattern.Pattern, out patternObj))
             {
                 var valuePattern = (ValuePattern)patternObj;
@@ -17,10 +18,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
                 var textPattern = (TextPattern)patternObj;
                 return textPattern.DocumentRange.GetText(-1).TrimEnd('\r');
             }
-            else
-            {
-                return element.Current.Name;
-            }
+            return element.Current.Name;
         }
     }
 }
