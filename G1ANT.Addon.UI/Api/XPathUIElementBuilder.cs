@@ -259,7 +259,7 @@ namespace G1ANT.Addon.UI
 
         public object Function(string prefix, string name, IList<object> args)
         {
-            if (args.Count == 2 && args[0] is AutomationProperty property && args[1] is string text)
+            if (args.Count == 2 && IsXpathFunction(name) && args[0] is AutomationProperty property && args[1] is string text)
             {
                 CompareFunc func = (elem, index) =>
                 {
@@ -280,6 +280,11 @@ namespace G1ANT.Addon.UI
                 default: return false;
 
             }
+        }
+
+        private bool IsXpathFunction (string name)
+        {
+            return name == "starts-with" || name == "ends-with" || name == "contains";
         }
     }
 }
