@@ -256,22 +256,23 @@ namespace G1ANT.Addon.UI
         {
             if (name.ToLower() == "contains" && args.Count == 2)
             {
-                if (args[0] is AutomationProperty property &&
-                    args[1] is string text)
+                if (args[0] is AutomationProperty property && args[1] is string text)
                 {
                     CompareFunc func = (elem, index) =>
                     {
                         if (elem.GetCurrentPropertyValue(property, true) is string str)
                         {
                             if (str.Contains(text))
+                            {
                                 return true;
+                            }
                         }
                         return false;
                     };
                     return func;
                 }
             }
-            throw new NotSupportedException($"Function {name} is not supportet.");
+            throw new NotSupportedException($"Function {name} is not supported.");
         }
     }
 }
