@@ -275,7 +275,7 @@ namespace G1ANT.Addon.UI
             switch (name.ToLower())
             {
                 case "starts-with": return str.StartsWith(text);
-                case "ends-width": return str.EndsWith(text);
+                case "ends-with": return str.EndsWith(text);
                 case "contains": return str.Contains(text);
                 default: return false;
 
