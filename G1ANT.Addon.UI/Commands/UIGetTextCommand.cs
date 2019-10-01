@@ -26,8 +26,7 @@ namespace G1ANT.Addon.UI
             if (element != null)
             {
                 var text = element.GetText();
-                Scripter.Variables.SetVariableValue(arguments.Result.Value,
-                    new TextStructure(text, null, Scripter));
+                Scripter.Variables.SetVariableValue(arguments.Result.Value, new TextStructure(text, null, Scripter));
             }
         }
     }
