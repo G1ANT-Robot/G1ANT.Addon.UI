@@ -123,6 +123,8 @@ namespace G1ANT.Addon.UI
                     Thread.Sleep(10);
                 }
             }
+
+            throw new Exception($"Could not click element: {automationElement.Current.Name}");
         }
 
         public void SetFocus()
