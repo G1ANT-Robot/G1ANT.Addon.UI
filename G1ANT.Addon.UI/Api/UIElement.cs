@@ -158,7 +158,7 @@ namespace G1ANT.Addon.UI
             else if (automationElement.Current.NativeWindowHandle != 0)
             {
                 automationElement.SetFocus();
-                IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
+                var wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
                 KeyboardTyper.TypeWithSendInput($"{SpecialChars.KeyBegin}ctrl+home{SpecialChars.KeyEnd}", null, wndHandle, IntPtr.Zero, timeout, false, 0); // Move to start of control
                 KeyboardTyper.TypeWithSendInput($"{SpecialChars.KeyBegin}ctrl+shift+end{SpecialChars.KeyEnd}", null, wndHandle, IntPtr.Zero, timeout, false, 0); // Select everything
                 KeyboardTyper.TypeWithSendInput(text, null, wndHandle, IntPtr.Zero, timeout, false, 0);
@@ -169,16 +169,19 @@ namespace G1ANT.Addon.UI
 
         public System.Windows.Rect GetRectangle()
         {
-            object boundingRectNoDefault =
-                automationElement.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty, true);
+            var boundingRectNoDefault = automationElement.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty, true);
             if (boundingRectNoDefault != AutomationElement.NotSupported)
+            {
                 return (System.Windows.Rect)boundingRectNoDefault;
+            }
             else if (automationElement.Current.NativeWindowHandle != 0)
             {
                 RobotWin32.Rect rect = new RobotWin32.Rect();
-                IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
+                var wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
                 if (RobotWin32.GetWindowRectangle(wndHandle, ref rect))
+                {
                     return new System.Windows.Rect(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
             }
             throw new NotSupportedException("Cannot get rectangle for that kind of UI element.");
         }
