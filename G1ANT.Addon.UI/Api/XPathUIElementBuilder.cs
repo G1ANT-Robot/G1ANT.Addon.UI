@@ -284,6 +284,7 @@ namespace G1ANT.Addon.UI
 
         private bool IsXpathFunction (string name)
         {
+            name = name.ToLower();
             return name == "starts-with" || name == "ends-with" || name == "contains";
         }
     }
