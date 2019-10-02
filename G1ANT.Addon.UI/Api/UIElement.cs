@@ -18,7 +18,7 @@ namespace G1ANT.Addon.UI.Api
 {
     public class UIElement
     {
-        public class AutomationNodeDescription
+        internal class AutomationNodeDescription
         {
             public string id;
             public string name;
@@ -54,7 +54,6 @@ namespace G1ANT.Addon.UI.Api
             throw new NullReferenceException($"Cannot find UI element described by \"{wPath.Value}\".");
         }
 
-
         private IEnumerable<AutomationNodeDescription> GetStackNodes(AutomationElement rootElement)
         {
             var elementStack = new Stack<AutomationNodeDescription>();
@@ -84,14 +83,14 @@ namespace G1ANT.Addon.UI.Api
         {
             var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
             var nodesDescriptionStack = GetStackNodes(automationRoot);
-            var wPath = ConvertNodesDescriptionStackInWPath(nodesDescriptionStack);
+            var wPath = ConvertNodesDescriptionToWPath(nodesDescriptionStack);
             return new WPathStructure(wPath);
         }
 
-        private string ConvertNodesDescriptionStackInWPath(IEnumerable<AutomationNodeDescription> nodesDescriptionStack)
+        private string ConvertNodesDescriptionToWPath(IEnumerable<AutomationNodeDescription> nodesDescriptionStack)
         {
             var isParentEmpty = false;
-            var wpath = "";
+            var result = "";
 
             foreach (var element in nodesDescriptionStack)
             {
@@ -106,23 +105,23 @@ namespace G1ANT.Addon.UI.Api
                     {
                         xpath += "descendant::";
                     }
-                    if (string.IsNullOrEmpty(element.id) == false)
+                    if (!string.IsNullOrEmpty(element.id))
                     {
                         xpath += $"ui[@id='{element.id}']";
                     }
-                    else if (string.IsNullOrEmpty(element.name) == false)
+                    else if (!string.IsNullOrEmpty(element.name))
                     {
                         xpath += $"ui[@name='{element.name}']";
                     }
-                    wpath += $"/{xpath}";
+                    result += $"/{xpath}";
                     isParentEmpty = false;
                 }
             }
 
-            return wpath;
+            return result;
         }
 
-        private bool IsParentEmpty(AutomationNodeDescription element)
+        private static bool IsParentEmpty(AutomationNodeDescription element)
         {
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
@@ -182,7 +181,6 @@ namespace G1ANT.Addon.UI.Api
             if (automationElement.FrameworkAutomationElement.TryGetPropertyValue(rectanglePropertyId, out var boundingRectNoDefault))
             {
                 return (System.Windows.Rect)boundingRectNoDefault;
-
             }
 
             if (automationElement.FrameworkAutomationElement.NativeWindowHandle != IntPtr.Zero)
