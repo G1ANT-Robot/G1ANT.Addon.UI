@@ -32,10 +32,16 @@ namespace G1ANT.Addon.UI
             while (elementNode != null)
             {
                 if (compare(elementNode, index))
+                {
                     return elementNode;
+                }
+
                 var descendantElement = FindDescendant(elementNode, compare);
                 if (descendantElement != null)
+                {
                     return descendantElement;
+                }
+
                 elementNode = TreeWalker.ControlViewWalker.GetNextSibling(elementNode);
                 index++;
             }
@@ -44,33 +50,32 @@ namespace G1ANT.Addon.UI
 
         protected AutomationElement FindChild(AutomationElement elem, CompareFunc compare)
         {
-            AutomationElement elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
-            int index = 0;
+            var elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
+            var index = 0;
             while (elementNode != null)
             {
                 if (compare(elementNode, index))
+                {
                     return elementNode;
+                }
+
                 elementNode = TreeWalker.ControlViewWalker.GetNextSibling(elementNode);
                 index++;
             }
-            //return null;
-            //var childrens = elem.FindAll(TreeScope.Children, PropertyCondition.TrueCondition);
-            //foreach (AutomationElement child in childrens)
-            //{
-            //    if (compare(child))
-            //        return child;
-            //}
             throw new ElementNotAvailableException();
         }
 
         protected AutomationElement FindFollowingSibling(AutomationElement elem, CompareFunc compare)
         {
-            AutomationElement elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
-            int index = 0;
+            var elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
+            var index = 0;
             while (elementNode != null)
             {
                 if (compare(elementNode, index))
+                {
                     return elementNode;
+                }
+
                 elementNode = TreeWalker.ControlViewWalker.GetNextSibling(elementNode);
                 index++;
             }
@@ -254,24 +259,33 @@ namespace G1ANT.Addon.UI
 
         public object Function(string prefix, string name, IList<object> args)
         {
-            if (name.ToLower() == "contains" && args.Count == 2)
+            if (args.Count == 2 && IsXpathFunction(name) && args[0] is AutomationProperty property && args[1] is string text)
             {
-                if (args[0] is AutomationProperty property &&
-                    args[1] is string text)
+                CompareFunc func = (elem, index) =>
                 {
-                    CompareFunc func = (elem, index) =>
-                    {
-                        if (elem.GetCurrentPropertyValue(property, true) is string str)
-                        {
-                            if (str.Contains(text))
-                                return true;
-                        }
-                        return false;
-                    };
-                    return func;
-                }
+                    return elem.GetCurrentPropertyValue(property, true) is string str && IsConditionMet(name, str, text);
+                };
+                return func;
             }
-            throw new NotSupportedException($"Function {name} is not supportet.");
+            throw new NotSupportedException($"Function {name} is not supported.");
+        }
+
+        private bool IsConditionMet(string name, string str, string text)
+        {
+            switch (name.ToLower())
+            {
+                case "starts-with": return str.StartsWith(text);
+                case "ends-with": return str.EndsWith(text);
+                case "contains": return str.Contains(text);
+                default: return false;
+
+            }
+        }
+
+        private bool IsXpathFunction (string name)
+        {
+            name = name.ToLower();
+            return name == "starts-with" || name == "ends-with" || name == "contains";
         }
     }
 }

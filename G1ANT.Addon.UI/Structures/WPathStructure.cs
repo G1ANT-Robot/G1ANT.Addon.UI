@@ -1,9 +1,9 @@
-﻿using G1ANT.Language;
+using G1ANT.Language;
 using System;
 
 namespace G1ANT.Addon.UI
 {
-    [Structure(Name = "wpath", Default = "", AutoCreate = false)]
+    [Structure(Name = "wpath", Default = "", AutoCreate = false, Tooltip = "This structure stores WPath information of UI elements and is used by the `ui.` family of commands, `waitfor.ui` included")]
     public class WPathStructure : StructureTyped<string>
     {
         public WPathStructure(string value, string format = "", AbstractScripter scripter = null) :

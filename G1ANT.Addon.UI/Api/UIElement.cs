@@ -1,10 +1,11 @@
 ﻿using System;
-using CodePlex.XPathParser;
 using System.Windows.Automation;
 using System.Collections.Generic;
-using G1ANT.Language;
 using System.Drawing;
 using System.Threading;
+using CodePlex.XPathParser;
+using G1ANT.Language;
+using G1ANT.Addon.UI.ExtensionMethods;
 
 namespace G1ANT.Addon.UI
 {
@@ -20,9 +21,7 @@ namespace G1ANT.Addon.UI
 
         public UIElement(AutomationElement element)
         {
-            if (element == null)
-                throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
-            automationElement = element;
+            automationElement = element ?? throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
         }
 
         public static UIElement FromWPath(WPathStructure wpath)
@@ -48,47 +47,66 @@ namespace G1ANT.Addon.UI
 
         public WPathStructure ToWPath(UIElement root = null)
         {
-            Stack<NodeDescription> stack = new Stack<NodeDescription>();
+            Stack<NodeDescription> elementStack = new Stack<NodeDescription>();
             TreeWalker walker = TreeWalker.ControlViewWalker;
             AutomationElement elementParent;
             AutomationElement node = automationElement;
             AutomationElement automationRoot = root != null ? root.automationElement : AutomationElement.RootElement;
+
             do
             {
-                stack.Push(new NodeDescription()
+                elementStack.Push(new NodeDescription()
                 {
                     id = node.Current.AutomationId,
                     name = node.Current.Name,
                     className = node.Current.ClassName,
                     type = node.Current.ControlType
                 });
+
                 elementParent = walker.GetParent(node);
+
                 if (elementParent == automationRoot)
+                {
                     break;
+                }
+
                 node = elementParent;
             }
             while (true);
 
-            bool parentIsEmpty = false;
+            bool isParentEmpty = false;
             string wpath = "";
-            foreach (var elem in stack)
+            foreach (var element in elementStack)
             {
-                if (string.IsNullOrEmpty(elem.id) && string.IsNullOrEmpty(elem.name))
-                    parentIsEmpty = true;
+                if (IsParentEmpty(element))
+                {
+                    isParentEmpty = true;
+                }
                 else
                 {
                     string xpath = "";
-                    if (parentIsEmpty)
+                    if (isParentEmpty)
+                    {
                         xpath += "descendant::";
-                    if (string.IsNullOrEmpty(elem.id) == false)
-                        xpath += $"ui[@id='{elem.id}']";
-                    else if (string.IsNullOrEmpty(elem.name) == false)
-                        xpath += $"ui[@name='{elem.name}']";
+                    }
+                    if (string.IsNullOrEmpty(element.id) == false)
+                    {
+                        xpath += $"ui[@id='{element.id}']";
+                    }
+                    else if (string.IsNullOrEmpty(element.name) == false)
+                    {
+                        xpath += $"ui[@name='{element.name}']";
+                    }
                     wpath += $"/{xpath}";
-                    parentIsEmpty = false;
+                    isParentEmpty = false;
                 }
             }
             return new WPathStructure(wpath);
+        }
+
+        private bool IsParentEmpty(NodeDescription element)
+        {
+            return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
         public void Click()
@@ -127,12 +145,6 @@ namespace G1ANT.Addon.UI
 
         public void SetFocus()
         {
-            //if (automationElement.Current.NativeWindowHandle != 0)
-            //{
-            //    IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
-            //    RobotWin32.SetFocus(wndHandle);
-            //}
-            //else
             automationElement.SetFocus();
         }
 
@@ -147,7 +159,7 @@ namespace G1ANT.Addon.UI
             else if (automationElement.Current.NativeWindowHandle != 0)
             {
                 automationElement.SetFocus();
-                IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
+                var wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
                 KeyboardTyper.TypeWithSendInput($"{SpecialChars.KeyBegin}ctrl+home{SpecialChars.KeyEnd}", null, wndHandle, IntPtr.Zero, timeout, false, 0); // Move to start of control
                 KeyboardTyper.TypeWithSendInput($"{SpecialChars.KeyBegin}ctrl+shift+end{SpecialChars.KeyEnd}", null, wndHandle, IntPtr.Zero, timeout, false, 0); // Select everything
                 KeyboardTyper.TypeWithSendInput(text, null, wndHandle, IntPtr.Zero, timeout, false, 0);
@@ -158,28 +170,26 @@ namespace G1ANT.Addon.UI
 
         public System.Windows.Rect GetRectangle()
         {
-            object boundingRectNoDefault =
-                automationElement.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty, true);
+            var boundingRectNoDefault = automationElement.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty, true);
             if (boundingRectNoDefault != AutomationElement.NotSupported)
+            {
                 return (System.Windows.Rect)boundingRectNoDefault;
+            }
             else if (automationElement.Current.NativeWindowHandle != 0)
             {
                 RobotWin32.Rect rect = new RobotWin32.Rect();
-                IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
+                var wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
                 if (RobotWin32.GetWindowRectangle(wndHandle, ref rect))
+                {
                     return new System.Windows.Rect(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
             }
             throw new NotSupportedException("Cannot get rectangle for that kind of UI element.");
         }
 
         public string GetText()
         {
-            //if (automationElement.Current.NativeWindowHandle != 0)
-            //{
-            //    IntPtr wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
-            //    return RobotWin32.GetWindowText(wndHandle);
-            //}
-            return automationElement.Current.Name;
+            return automationElement.GetText();
         }
     }
 }
