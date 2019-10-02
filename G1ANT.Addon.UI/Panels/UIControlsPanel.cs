@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Windows.Forms;
 using G1ANT.Language;
-using System.Windows.Automation;
 using System.Text;
 using System.Drawing;
+using FlaUI.Core;
+using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Definitions;
+using FlaUI.Core.Identifiers;
 
 namespace G1ANT.Addon.UI.Panels
 {
@@ -31,8 +34,9 @@ namespace G1ANT.Addon.UI.Panels
         private void InitRootElement()
         {
             controlsTree.Nodes.Clear();
-            var root = AutomationElement.RootElement;
-            var rootNode = controlsTree.Nodes.Add(root?.Current.Name);
+            
+            var root = AutomationSingleton.Automation.GetDesktop();
+            var rootNode = controlsTree.Nodes.Add(root?.FrameworkAutomationElement.Name);
             rootNode.Tag = root;
             rootNode.Nodes.Add("");
             rootNode.Expand();
@@ -53,9 +57,9 @@ namespace G1ANT.Addon.UI.Panels
             if (element == null)
                 return "";
             string id = "";
-            if (string.IsNullOrWhiteSpace(element.Current.AutomationId) == false)
-                id = $" #{element.Current.AutomationId}";
-            return $"{CutControlType(element.Current.ControlType.ProgrammaticName)}{id} \"{element.Current.Name}\"";
+            if (string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault) == false)
+                id = $" #{element.Properties.AutomationId.ValueOrDefault}";
+            return $"{CutControlType(element.ControlType.ToString())}{id} \"{element.Properties.Name.ValueOrDefault}\"";
         }
 
         private string GetTreeNodeTooltip(AutomationElement element, int index)
@@ -63,18 +67,18 @@ namespace G1ANT.Addon.UI.Panels
             if (element == null)
                 return null;
             StringBuilder result = new StringBuilder();
-
-            if (!string.IsNullOrWhiteSpace(element.Current.AutomationId))
-                result.AppendLine($"id: {element.Current.AutomationId}");
-            if (element.Current.ControlType != null)
+            
+            if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
+                result.AppendLine($"id: {element.Properties.AutomationId.ValueOrDefault}");
+            if (element.ControlType != null)
             {
-                result.AppendLine($"type: {CutControlType(element.Current.ControlType.ProgrammaticName)}");
-                result.AppendLine($"typeid: {element.Current.ControlType.Id}");
+                result.AppendLine($"type: {CutControlType(element.ControlType.ToString())}");
+                result.AppendLine($"typeid: {(int)element.ControlType}");
             }
-            if (!string.IsNullOrWhiteSpace(element.Current.ClassName))
-                result.AppendLine($"class: {element.Current.ClassName}");
-            if (!string.IsNullOrWhiteSpace(element.Current.Name))
-                result.AppendLine($"name: {element.Current.Name}");
+            if (!string.IsNullOrWhiteSpace(element.Properties.ClassName.ValueOrDefault))
+                result.AppendLine($"class: {element.ClassName}");
+            if (!string.IsNullOrWhiteSpace(element.Properties.Name.ValueOrDefault))
+                result.AppendLine($"name: {element.Name}");
             result.AppendLine($"control index: {index}");
             return result.ToString();
         }
@@ -86,7 +90,8 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (e.Node.Tag is AutomationElement element)
                 {
-                    AutomationElement elem = TreeWalker.ControlViewWalker.GetFirstChild(element);
+                    var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
+                    AutomationElement elem = treeWalker.GetFirstChild(element);
                     int i = 0;
                     while (elem != null)
                     {
@@ -95,7 +100,7 @@ namespace G1ANT.Addon.UI.Panels
                         node.Tag = elem;
                         node.Nodes.Add("");
 
-                        elem = TreeWalker.ControlViewWalker.GetNextSibling(elem);
+                        elem = treeWalker.GetNextSibling(elem);
                     }
                 }
             }
@@ -112,7 +117,7 @@ namespace G1ANT.Addon.UI.Panels
                     if (controlsTree.SelectedNode.Tag is AutomationElement automationElement)
                     {
                         UIElement uiELement = new UIElement(automationElement);
-                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiELement.ToWPath().ToString()}{SpecialChars.Text}");
+                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiELement.ToWPath()}{SpecialChars.Text}");
                     }
                 }
             }
@@ -139,8 +144,10 @@ namespace G1ANT.Addon.UI.Panels
 
         private AutomationElement GetTopLevelWindow(AutomationElement element)
         {
-            AutomationElement elementParent = TreeWalker.ControlViewWalker.GetParent(element);
-            return elementParent == AutomationElement.RootElement ? element : GetTopLevelWindow(elementParent);
+            var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
+            var elementParent = treeWalker.GetParent(element);
+            
+            return elementParent == AutomationSingleton.Automation.GetDesktop() ? element : GetTopLevelWindow(elementParent);
         }
 
         private void highlightToolStripMenuItem_Click(object sender, EventArgs e)
@@ -158,7 +165,7 @@ namespace G1ANT.Addon.UI.Panels
                             var window = GetTopLevelWindow(automationElement);
                             if (window != null)
                             {
-                                var iHandle = new IntPtr(window.Current.NativeWindowHandle);
+                                var iHandle = window.FrameworkAutomationElement.NativeWindowHandle;
                                 if (iHandle != IntPtr.Zero)
                                 {
                                     RobotWin32.BringWindowToFront(iHandle);

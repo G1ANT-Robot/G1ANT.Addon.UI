@@ -22,6 +22,7 @@ namespace G1ANT.Addon.UI
             var element = UIElement.FromWPath(arguments.WPath);
             if (element != null)
             {
+                element.SetFocus();
                 element.Click();
             }
         }

@@ -1,11 +1,17 @@
 ﻿using System;
-using System.Windows.Automation;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using CodePlex.XPathParser;
 using G1ANT.Language;
 using G1ANT.Addon.UI.ExtensionMethods;
+using AutomationElement = FlaUI.Core.AutomationElements.AutomationElement;
+using ControlType = FlaUI.Core.Definitions.ControlType;
+using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
+using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
+using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
+using FlaUI.Core.Identifiers;
+using FlaUI.UIA3.Identifiers;
 
 namespace G1ANT.Addon.UI
 {
@@ -48,24 +54,23 @@ namespace G1ANT.Addon.UI
         public WPathStructure ToWPath(UIElement root = null)
         {
             Stack<NodeDescription> elementStack = new Stack<NodeDescription>();
-            TreeWalker walker = TreeWalker.ControlViewWalker;
             AutomationElement elementParent;
             AutomationElement node = automationElement;
-            AutomationElement automationRoot = root != null ? root.automationElement : AutomationElement.RootElement;
-
+            AutomationElement automationRoot = root != null ? root.automationElement : AutomationSingleton.Automation.GetDesktop();
+            var walker = automationRoot.Automation.TreeWalkerFactory.GetControlViewWalker();
             do
             {
                 elementStack.Push(new NodeDescription()
                 {
-                    id = node.Current.AutomationId,
-                    name = node.Current.Name,
-                    className = node.Current.ClassName,
-                    type = node.Current.ControlType
+                    id = node.Properties.AutomationId.ValueOrDefault,
+                    name = node.Properties.Name.ValueOrDefault,
+                    className = node.Properties.ClassName.ValueOrDefault,
+                    type = node.Properties.ControlType.ValueOrDefault
                 });
 
                 elementParent = walker.GetParent(node);
 
-                if (elementParent == automationRoot)
+                if (elementParent == automationRoot || elementParent == null)
                 {
                     break;
                 }
@@ -133,11 +138,11 @@ namespace G1ANT.Addon.UI
                     Thread.Sleep(10);
                 }
             }
-            else if (automationElement.TryGetCurrentPattern(InvokePattern.Pattern, out var invokePattern))
+            else if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(InvokePattern.Pattern, out var invokePattern))
             {
                 (invokePattern as InvokePattern)?.Invoke();
             }
-            else if (automationElement.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var selectionPattern))
+            else if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(SelectionItemPattern.Pattern, out var selectionPattern))
             {
                 (selectionPattern as SelectionItemPattern)?.Select();
             }
@@ -145,21 +150,21 @@ namespace G1ANT.Addon.UI
 
         public void SetFocus()
         {
-            automationElement.SetFocus();
+            automationElement.Focus();
         }
 
         public void SetText(string text, int timeout)
         {
             object valuePattern = null;
-            if (automationElement.TryGetCurrentPattern(ValuePattern.Pattern, out valuePattern))
+            if (automationElement.FrameworkAutomationElement.TryGetNativePattern(ValuePattern.Pattern, out valuePattern))
             {
-                automationElement.SetFocus();
+                automationElement.Focus();;
                 ((ValuePattern)valuePattern).SetValue(text);
             }
-            else if (automationElement.Current.NativeWindowHandle != 0)
+            else if (automationElement.Properties.NativeWindowHandle != IntPtr.Zero)
             {
-                automationElement.SetFocus();
-                var wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
+                automationElement.Focus();
+                IntPtr wndHandle = automationElement.FrameworkAutomationElement.NativeWindowHandle;
                 KeyboardTyper.TypeWithSendInput($"{SpecialChars.KeyBegin}ctrl+home{SpecialChars.KeyEnd}", null, wndHandle, IntPtr.Zero, timeout, false, 0); // Move to start of control
                 KeyboardTyper.TypeWithSendInput($"{SpecialChars.KeyBegin}ctrl+shift+end{SpecialChars.KeyEnd}", null, wndHandle, IntPtr.Zero, timeout, false, 0); // Select everything
                 KeyboardTyper.TypeWithSendInput(text, null, wndHandle, IntPtr.Zero, timeout, false, 0);
@@ -170,15 +175,17 @@ namespace G1ANT.Addon.UI
 
         public System.Windows.Rect GetRectangle()
         {
-            var boundingRectNoDefault = automationElement.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty, true);
-            if (boundingRectNoDefault != AutomationElement.NotSupported)
+            var rectanglePropertyId = new PropertyId(AutomationObjectIds.BoundingRectangleProperty.Id, AutomationObjectIds.BoundingRectangleProperty.Name);
+            if (automationElement.FrameworkAutomationElement.TryGetPropertyValue(rectanglePropertyId, out var boundingRectNoDefault))
             {
                 return (System.Windows.Rect)boundingRectNoDefault;
+
             }
-            else if (automationElement.Current.NativeWindowHandle != 0)
+
+            if (automationElement.FrameworkAutomationElement.NativeWindowHandle != IntPtr.Zero)
             {
                 RobotWin32.Rect rect = new RobotWin32.Rect();
-                var wndHandle = new IntPtr(automationElement.Current.NativeWindowHandle);
+                IntPtr wndHandle = automationElement.FrameworkAutomationElement.NativeWindowHandle;
                 if (RobotWin32.GetWindowRectangle(wndHandle, ref rect))
                 {
                     return new System.Windows.Rect(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
