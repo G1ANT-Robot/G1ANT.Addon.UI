@@ -7,6 +7,7 @@ using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Identifiers;
+using G1ANT.Addon.UI.Api;
 
 namespace G1ANT.Addon.UI.Panels
 {

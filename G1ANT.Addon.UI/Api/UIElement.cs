@@ -3,72 +3,70 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using CodePlex.XPathParser;
-using G1ANT.Language;
+using FlaUI.Core;
+using FlaUI.Core.Identifiers;
+using FlaUI.UIA3.Identifiers;
 using G1ANT.Addon.UI.ExtensionMethods;
+using G1ANT.Language;
 using AutomationElement = FlaUI.Core.AutomationElements.AutomationElement;
 using ControlType = FlaUI.Core.Definitions.ControlType;
 using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
 using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
 using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
-using FlaUI.Core.Identifiers;
-using FlaUI.UIA3.Identifiers;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Api
 {
     public class UIElement
     {
+        public class AutomationNodeDescription
+        {
+            public string id;
+            public string name;
+            public string className;
+            public ControlType type;
+
+            public AutomationNodeDescription(FrameworkAutomationElementBase.IProperties properties)
+            {
+                id = properties.AutomationId.ValueOrDefault;
+                name = properties.Name.ValueOrDefault;
+                className = properties.ClassName.ValueOrDefault;
+                type = properties.ControlType.ValueOrDefault;
+            }
+        }
         public static UIElement RootElement { get; set; } = null;
 
         protected AutomationElement automationElement;
 
-        private UIElement()
-        {
-        }
+        private UIElement(){}
 
         public UIElement(AutomationElement element)
         {
             automationElement = element ?? throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
         }
 
-        public static UIElement FromWPath(WPathStructure wpath)
+        public static UIElement FromWPath(WPathStructure wPath)
         {
-            object xe = new XPathParser<object>().Parse(wpath.Value, new XPathUIElementBuilder(RootElement?.automationElement));
+            var xe = new XPathParser<object>().Parse(wPath.Value, new XPathUIElementBuilder(RootElement?.automationElement));
             if (xe is AutomationElement element)
             {
-                return new UIElement()
-                {
-                    automationElement = element
-                };
+                return new UIElement(){ automationElement = element };
             }
-            throw new NullReferenceException($"Cannot find UI element described by \"{wpath.Value}\".");
+            throw new NullReferenceException($"Cannot find UI element described by \"{wPath.Value}\".");
         }
 
-        public class NodeDescription
-        {
-            public string id;
-            public string name;
-            public string className;
-            public ControlType type;
-        }
 
-        public WPathStructure ToWPath(UIElement root = null)
+        private IEnumerable<AutomationNodeDescription> GetStackNodes(AutomationElement rootElement)
         {
-            Stack<NodeDescription> elementStack = new Stack<NodeDescription>();
-            AutomationElement elementParent;
-            AutomationElement node = automationElement;
-            AutomationElement automationRoot = root != null ? root.automationElement : AutomationSingleton.Automation.GetDesktop();
+            var elementStack = new Stack<AutomationNodeDescription>();
+            var node = automationElement;
+            var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
             var walker = automationRoot.Automation.TreeWalkerFactory.GetControlViewWalker();
+
             do
             {
-                elementStack.Push(new NodeDescription()
-                {
-                    id = node.Properties.AutomationId.ValueOrDefault,
-                    name = node.Properties.Name.ValueOrDefault,
-                    className = node.Properties.ClassName.ValueOrDefault,
-                    type = node.Properties.ControlType.ValueOrDefault
-                });
+                elementStack.Push(new AutomationNodeDescription(node.Properties));
 
-                elementParent = walker.GetParent(node);
+                var elementParent = walker.GetParent(node);
 
                 if (elementParent == automationRoot || elementParent == null)
                 {
@@ -79,9 +77,23 @@ namespace G1ANT.Addon.UI
             }
             while (true);
 
-            bool isParentEmpty = false;
-            string wpath = "";
-            foreach (var element in elementStack)
+            return elementStack;
+        }
+
+        public WPathStructure ToWPath(AutomationElement rootElement = null)
+        {
+            var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
+            var nodesDescriptionStack = GetStackNodes(automationRoot);
+            var wPath = ConvertNodesDescriptionStackInWPath(nodesDescriptionStack);
+            return new WPathStructure(wPath);
+        }
+
+        private string ConvertNodesDescriptionStackInWPath(IEnumerable<AutomationNodeDescription> nodesDescriptionStack)
+        {
+            var isParentEmpty = false;
+            var wpath = "";
+
+            foreach (var element in nodesDescriptionStack)
             {
                 if (IsParentEmpty(element))
                 {
@@ -89,7 +101,7 @@ namespace G1ANT.Addon.UI
                 }
                 else
                 {
-                    string xpath = "";
+                    var xpath = "";
                     if (isParentEmpty)
                     {
                         xpath += "descendant::";
@@ -106,10 +118,11 @@ namespace G1ANT.Addon.UI
                     isParentEmpty = false;
                 }
             }
-            return new WPathStructure(wpath);
+
+            return wpath;
         }
 
-        private bool IsParentEmpty(NodeDescription element)
+        private bool IsParentEmpty(AutomationNodeDescription element)
         {
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
@@ -121,16 +134,7 @@ namespace G1ANT.Addon.UI
                 var tempPos = MouseWin32.GetPhysicalCursorPosition();
                 var currentPos = new Point(tempPos.X, tempPos.Y);
                 var targetPos = new Point((int)pt.X, (int)pt.Y);
-
-                List<MouseStr.MouseEventArgs> mouseArgs =
-                    MouseStr.ToMouseEventsArgs(
-                        targetPos.X,
-                        targetPos.Y,
-                        currentPos.X,
-                        currentPos.Y,
-                        "left",
-                        "press",
-                        1);
+                var mouseArgs = MouseStr.ToMouseEventsArgs(targetPos.X, targetPos.Y, currentPos.X, currentPos.Y, "left", "press", 1);
 
                 foreach (var arg in mouseArgs)
                 {
@@ -155,8 +159,7 @@ namespace G1ANT.Addon.UI
 
         public void SetText(string text, int timeout)
         {
-            object valuePattern = null;
-            if (automationElement.FrameworkAutomationElement.TryGetNativePattern(ValuePattern.Pattern, out valuePattern))
+            if (automationElement.FrameworkAutomationElement.TryGetNativePattern(ValuePattern.Pattern, out object valuePattern))
             {
                 automationElement.Focus();;
                 ((ValuePattern)valuePattern).SetValue(text);
@@ -184,7 +187,7 @@ namespace G1ANT.Addon.UI
 
             if (automationElement.FrameworkAutomationElement.NativeWindowHandle != IntPtr.Zero)
             {
-                RobotWin32.Rect rect = new RobotWin32.Rect();
+                var rect = new RobotWin32.Rect();
                 IntPtr wndHandle = automationElement.FrameworkAutomationElement.NativeWindowHandle;
                 if (RobotWin32.GetWindowRectangle(wndHandle, ref rect))
                 {

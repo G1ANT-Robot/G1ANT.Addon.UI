@@ -2,6 +2,7 @@ using System;
 using G1ANT.Language;
 using System.Windows.Forms;
 using System.Threading;
+using G1ANT.Addon.UI.Api;
 
 namespace G1ANT.Addon.UI
 {
