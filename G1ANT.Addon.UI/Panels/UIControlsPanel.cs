@@ -186,7 +186,7 @@ namespace G1ANT.Addon.UI.Panels
 
         private Timer blinkTimer;
         private int blinkTimes;
-        private void InitializeRectangleForm(System.Windows.Rect rect)
+        private void InitializeRectangleForm(Rectangle rect)
         {
             blinkingRectForm = new Form();
             Panel transparentPanel = new Panel();
