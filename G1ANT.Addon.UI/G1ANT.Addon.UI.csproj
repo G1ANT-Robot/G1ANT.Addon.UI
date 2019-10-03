@@ -116,11 +116,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="CustomInterop.UIAutomationClient.il" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(TargetDir)\Interop.UIAutomationClient.dll">
+    <EmbeddedResource Include="..\packages\FlaUI.UIA3.2.0.0-rc1\lib\net45\Interop.UIAutomationClient.dll">
       <Link>Interop.UIAutomationClient.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\packages\FlaUI.Core.2.0.0-rc1\lib\net45\FlaUI.Core.dll">
+      <Link>FlaUI.Core.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\packages\FlaUI.UIA3.2.0.0-rc1\lib\net45\FlaUI.UIA3.dll">
+      <Link>FlaUI.UIA3.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -141,10 +149,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"$(FrameworkDir)\$(FrameworkVersion)\ilasm" "$(ProjectDir)\CustomInterop.UIAutomationClient.il" /dll /output="$(TargetDir)\Interop.UIAutomationClient.dll"</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).dll" "$(SolutionDir)..\G1ANT.Robot.CI\G1ANT.Robot\bin\Debug\" /F /Y 
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

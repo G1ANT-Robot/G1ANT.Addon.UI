@@ -1,12 +1,11 @@
 ﻿using System;
-using CodePlex.XPathParser;
-
 using System.Collections.Generic;
 using FlaUI.Core;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Exceptions;
 using FlaUI.Core.Identifiers;
 using FlaUI.UIA3.Identifiers;
-using AutomationElement = FlaUI.Core.AutomationElements.AutomationElement;
+using G1ANT.Addon.UI.XPathParser;
 using CompareFunc = System.Func<FlaUI.Core.AutomationElements.AutomationElement, int, bool>;
 using GetElementFunc = System.Func<
     FlaUI.Core.AutomationElements.AutomationElement,
@@ -17,7 +16,7 @@ using FindElementFunc = System.Func<
     FlaUI.Core.AutomationElements.AutomationElement>;
 using NotSupportedException = System.NotSupportedException;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Api
 {
     public class XPathUIElementBuilder : IXPathBuilder<object>
     {
@@ -27,11 +26,10 @@ namespace G1ANT.Addon.UI
             ProgrammaticName,
         }
 
-        public AutomationElement Root { get; } = AutomationSingleton.Automation.GetDesktop();
+        public AutomationElement Root { get; }
         public XPathUIElementBuilder(AutomationElement root = null)
         {
-            if (root != null)
-                Root = root;
+            Root = root ?? AutomationSingleton.Automation.GetDesktop();
         }
 
         protected AutomationElement FindDescendant(AutomationElement elem, CompareFunc compare)

@@ -3,15 +3,13 @@ using System.Windows.Forms;
 using G1ANT.Language;
 using System.Text;
 using System.Drawing;
-using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
-using FlaUI.Core.Identifiers;
 using G1ANT.Addon.UI.Api;
 
 namespace G1ANT.Addon.UI.Panels
 {
-    [PanelAttribute(Name = "Windows Tree", DockingSide = DockingSide.Right, InitialAppear = false, Width = 400)]
+    [Panel(Name = "Windows Tree", DockingSide = DockingSide.Right, InitialAppear = false, Width = 400)]
     public partial class UIControlsPanel : RobotPanel
     {
         private Form blinkingRectForm; 
@@ -37,7 +35,7 @@ namespace G1ANT.Addon.UI.Panels
             controlsTree.Nodes.Clear();
             
             var root = AutomationSingleton.Automation.GetDesktop();
-            var rootNode = controlsTree.Nodes.Add(root?.FrameworkAutomationElement.Name);
+            var rootNode = controlsTree.Nodes.Add(root.FrameworkAutomationElement.Name);
             rootNode.Tag = root;
             rootNode.Nodes.Add("");
             rootNode.Expand();
@@ -58,7 +56,7 @@ namespace G1ANT.Addon.UI.Panels
             if (element == null)
                 return "";
             string id = "";
-            if (string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault) == false)
+            if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
                 id = $" #{element.Properties.AutomationId.ValueOrDefault}";
             return $"{CutControlType(element.ControlType.ToString())}{id} \"{element.Properties.Name.ValueOrDefault}\"";
         }
@@ -67,15 +65,14 @@ namespace G1ANT.Addon.UI.Panels
         {
             if (element == null)
                 return null;
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             
             if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
                 result.AppendLine($"id: {element.Properties.AutomationId.ValueOrDefault}");
-            if (element.ControlType != null)
-            {
-                result.AppendLine($"type: {CutControlType(element.ControlType.ToString())}");
-                result.AppendLine($"typeid: {(int)element.ControlType}");
-            }
+            
+            result.AppendLine($"type: {CutControlType(element.ControlType.ToString())}");
+            result.AppendLine($"typeid: {(int)element.ControlType}");
+        
             if (!string.IsNullOrWhiteSpace(element.Properties.ClassName.ValueOrDefault))
                 result.AppendLine($"class: {element.ClassName}");
             if (!string.IsNullOrWhiteSpace(element.Properties.Name.ValueOrDefault))
@@ -92,8 +89,8 @@ namespace G1ANT.Addon.UI.Panels
                 if (e.Node.Tag is AutomationElement element)
                 {
                     var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
-                    AutomationElement elem = treeWalker.GetFirstChild(element);
-                    int i = 0;
+                    var elem = treeWalker.GetFirstChild(element);
+                    var i = 0;
                     while (elem != null)
                     {
                         var node = e.Node.Nodes.Add(GetTreeNodeName(elem));
@@ -117,8 +114,8 @@ namespace G1ANT.Addon.UI.Panels
                 {
                     if (controlsTree.SelectedNode.Tag is AutomationElement automationElement)
                     {
-                        UIElement uiELement = new UIElement(automationElement);
-                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiELement.ToWPath()}{SpecialChars.Text}");
+                        var uiElement = new UIElement(automationElement);
+                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiElement.ToWPath()}{SpecialChars.Text}");
                     }
                 }
             }
