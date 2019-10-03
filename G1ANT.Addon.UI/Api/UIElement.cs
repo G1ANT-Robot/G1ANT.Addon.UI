@@ -129,19 +129,19 @@ namespace G1ANT.Addon.UI.Api
 
         public void Click()
         {
-            if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(InvokePattern.Pattern, out var invokePattern))
+            if (automationElement.IsPatternSupported(InvokePattern.Pattern) && automationElement.Patterns.Invoke.TryGetPattern(out var invokePattern))
             {
                 (invokePattern as InvokePattern)?.Invoke();
             }
-            else if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(SelectionItemPattern.Pattern, out var selectionPattern))
+            else if (automationElement.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
             {
                 (selectionPattern as SelectionItemPattern)?.Select();
             }
-            if (automationElement.TryGetClickablePoint(out var pt))
+            else if (automationElement.TryGetClickablePoint(out var pt))
             {
                 var tempPos = MouseWin32.GetPhysicalCursorPosition();
                 var currentPos = new Point(tempPos.X, tempPos.Y);
-                var targetPos = new Point((int)pt.X, (int)pt.Y);
+                var targetPos = new Point(pt.X, pt.Y);
                 var mouseArgs = MouseStr.ToMouseEventsArgs(targetPos.X, targetPos.Y, currentPos.X, currentPos.Y, "left", "press", 1);
 
                 foreach (var arg in mouseArgs)
