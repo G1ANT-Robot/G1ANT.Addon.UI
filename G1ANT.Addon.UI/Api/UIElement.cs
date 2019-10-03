@@ -133,7 +133,7 @@ namespace G1ANT.Addon.UI.Api
             {
                 (invokePattern as InvokePattern)?.Invoke();
             }
-            else if (automationElement.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
+            else if (automationElement.IsPatternSupported(SelectionItemPattern.Pattern) && automationElement.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
             {
                 (selectionPattern as SelectionItemPattern)?.Select();
             }
@@ -163,7 +163,7 @@ namespace G1ANT.Addon.UI.Api
 
         public void SetText(string text, int timeout)
         {
-            if (automationElement.FrameworkAutomationElement.TryGetNativePattern(ValuePattern.Pattern, out object valuePattern))
+            if (automationElement.Patterns.Value.IsSupported && automationElement.Patterns.Value.TryGetPattern(out var valuePattern))
             {
                 automationElement.Focus();
                 ((ValuePattern)valuePattern).SetValue(text);
@@ -180,12 +180,12 @@ namespace G1ANT.Addon.UI.Api
                 throw new NotSupportedException("SetText is not supported");
         }
 
-        public Rect GetRectangle()
+        public Rectangle GetRectangle()
         {
-            var rectanglePropertyId = new PropertyId(AutomationObjectIds.BoundingRectangleProperty.Id, AutomationObjectIds.BoundingRectangleProperty.Name);
-            if (automationElement.FrameworkAutomationElement.TryGetPropertyValue(rectanglePropertyId, out var boundingRectNoDefault))
+
+            if (automationElement.Properties.BoundingRectangle.TryGetValue(out var boundingRectNoDefault))
             {
-                return (Rect)boundingRectNoDefault;
+                return boundingRectNoDefault;
             }
 
             if (automationElement.FrameworkAutomationElement.NativeWindowHandle != IntPtr.Zero)
@@ -194,7 +194,7 @@ namespace G1ANT.Addon.UI.Api
                 IntPtr wndHandle = automationElement.FrameworkAutomationElement.NativeWindowHandle;
                 if (RobotWin32.GetWindowRectangle(wndHandle, ref rect))
                 {
-                    return new Rect(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                    return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
                 }
             }
             throw new NotSupportedException("Cannot get rectangle for that kind of UI element.");
