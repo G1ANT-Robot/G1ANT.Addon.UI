@@ -1,7 +1,7 @@
-using System.Text;
 using System;
+using System.Text;
 
-namespace CodePlex.XPathParser
+namespace G1ANT.Addon.UI.XPathParser
 {
     public class XPathParserException : System.Exception
     {

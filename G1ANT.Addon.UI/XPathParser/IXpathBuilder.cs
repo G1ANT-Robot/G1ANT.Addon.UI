@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Xml.XPath;
 
-namespace CodePlex.XPathParser {
+namespace G1ANT.Addon.UI.XPathParser {
     public interface IXPathBuilder<Node> {
         // Should be called once per build
         void StartBuild();                 

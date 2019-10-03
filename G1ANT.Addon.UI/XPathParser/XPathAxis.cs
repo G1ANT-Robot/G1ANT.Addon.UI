@@ -1,4 +1,4 @@
-namespace CodePlex.XPathParser
+namespace G1ANT.Addon.UI.XPathParser
 {
     public enum XPathAxis
     {

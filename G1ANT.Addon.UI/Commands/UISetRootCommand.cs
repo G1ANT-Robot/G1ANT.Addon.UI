@@ -1,7 +1,8 @@
-using System;
+using G1ANT.Addon.UI.Api;
+using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Commands
 {
     [Command(Name = "ui.setroot",
         Tooltip = "This command sets a root window, to which other UI elements will refer to by WPath")]

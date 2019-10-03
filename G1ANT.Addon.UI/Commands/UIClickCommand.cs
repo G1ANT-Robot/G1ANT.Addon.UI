@@ -1,7 +1,8 @@
-using System;
+using G1ANT.Addon.UI.Api;
+using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Commands
 {
     [Command(Name = "ui.click",
         Tooltip = "This command clicks a desktop application UI element specified by WPath structure")]
@@ -22,6 +23,7 @@ namespace G1ANT.Addon.UI
             var element = UIElement.FromWPath(arguments.WPath);
             if (element != null)
             {
+                element.SetFocus();
                 element.Click();
             }
         }
