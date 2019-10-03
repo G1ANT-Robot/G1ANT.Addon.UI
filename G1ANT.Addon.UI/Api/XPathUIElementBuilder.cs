@@ -77,7 +77,11 @@ namespace G1ANT.Addon.UI.Api
                 elementNode = treeWalker.GetNextSibling(elementNode);
                 index++;
             }
-            throw new ElementNotAvailableException();
+
+            if (!elem.Equals(AutomationSingleton.Automation.GetDesktop()))
+                throw new ElementNotAvailableException();
+            else
+                return elem;
         }
 
         protected AutomationElement FindFollowingSibling(AutomationElement elem, CompareFunc compare)
