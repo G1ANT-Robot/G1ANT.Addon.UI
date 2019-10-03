@@ -129,6 +129,14 @@ namespace G1ANT.Addon.UI.Api
 
         public void Click()
         {
+            if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(InvokePattern.Pattern, out var invokePattern))
+            {
+                (invokePattern as InvokePattern)?.Invoke();
+            }
+            else if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(SelectionItemPattern.Pattern, out var selectionPattern))
+            {
+                (selectionPattern as SelectionItemPattern)?.Select();
+            }
             if (automationElement.TryGetClickablePoint(out var pt))
             {
                 var tempPos = MouseWin32.GetPhysicalCursorPosition();
@@ -142,13 +150,9 @@ namespace G1ANT.Addon.UI.Api
                     Thread.Sleep(10);
                 }
             }
-            else if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(InvokePattern.Pattern, out var invokePattern))
+            else
             {
-                (invokePattern as InvokePattern)?.Invoke();
-            }
-            else if (automationElement.FrameworkAutomationElement.TryGetNativePattern<object>(SelectionItemPattern.Pattern, out var selectionPattern))
-            {
-                (selectionPattern as SelectionItemPattern)?.Select();
+                throw new Exception($"Could not click element: {automationElement.Name}");
             }
         }
 
