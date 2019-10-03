@@ -1,8 +1,8 @@
-using System;
 using G1ANT.Addon.UI.Api;
+using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Commands
 {
     [Command(Name = "ui.settext",
         Tooltip = "This command inserts text into a specified UI element of a desktop application window")]

@@ -1,10 +1,11 @@
 using System;
-using G1ANT.Language;
-using System.Windows.Forms;
 using System.Threading;
+using System.Windows.Forms;
 using G1ANT.Addon.UI.Api;
+using G1ANT.Addon.UI.Structures;
+using G1ANT.Language;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Commands
 {
     [Command(Name = "waitfor.ui",
         Tooltip = "This command waits for a UI element of a desktop application specified by WPath structure")]

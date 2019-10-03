@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
-namespace CodePlex.XPathParser {
+namespace G1ANT.Addon.UI.XPathParser {
     using XPathNodeType = System.Xml.XPath.XPathNodeType;
-    using System.Globalization;
 
     public class XPathParser<Node> {
         private XPathScanner        scanner;
