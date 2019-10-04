@@ -21,11 +21,7 @@ namespace G1ANT.Addon.UI.Commands
         public void Execute(Arguments arguments)
         {
             var element = UIElement.FromWPath(arguments.WPath);
-            if (element != null)
-            {
-                element.SetFocus();
-                element.Click();
-            }
+            element?.Click();
         }
     }
 }

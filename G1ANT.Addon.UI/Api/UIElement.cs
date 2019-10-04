@@ -5,9 +5,11 @@ using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Identifiers;
+using FlaUI.Core.Input;
 using FlaUI.UIA3.Identifiers;
 using G1ANT.Addon.UI.XPathParser;
 using G1ANT.Addon.UI.ExtensionMethods;
+using G1ANT.Addon.UI.Models;
 using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
 using ControlType = FlaUI.Core.Definitions.ControlType;
@@ -125,6 +127,32 @@ namespace G1ANT.Addon.UI.Api
         private static bool IsParentEmpty(AutomationNodeDescription element)
         {
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
+        }
+
+        public void SpecialClick(int eventId = 9000, int? x = 0, int? y = 0)
+        {
+            var srcPoint = automationElement.GetClickablePoint();
+
+            if (x.HasValue && x != 0 && y.HasValue && y != 0 && srcPoint != Point.Empty)
+            {
+                var relative = new Point(srcPoint.X - x.Value, srcPoint.Y - y.Value);
+
+                if (eventId == UIEventIdModel.MouseLeftClick.Id)
+                    Mouse.Click(MouseButton.Left, relative);
+                else if (eventId == UIEventIdModel.MouseRightClick.Id)
+                    Mouse.RightClick(relative);
+                else if (eventId == UIEventIdModel.MouseDoubleClick.Id)
+                    Mouse.DoubleClick(MouseButton.Left, relative);
+            }
+            else
+            {
+                if (eventId == UIEventIdModel.MouseLeftClick.Id)
+                    automationElement.Click();
+                else if (eventId == UIEventIdModel.MouseRightClick.Id)
+                    automationElement.RightClick();
+                else if (eventId == UIEventIdModel.MouseDoubleClick.Id)
+                    automationElement.DoubleClick();
+            }
         }
 
         public void Click()
