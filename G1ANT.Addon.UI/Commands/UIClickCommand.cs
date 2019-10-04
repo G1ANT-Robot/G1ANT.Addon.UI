@@ -1,3 +1,5 @@
+using FlaUI.Core.Identifiers;
+using FlaUI.Core.Input;
 using G1ANT.Addon.UI.Api;
 using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
@@ -12,6 +14,7 @@ namespace G1ANT.Addon.UI.Commands
         {
             [Argument(Required = true, Tooltip = "Desktop application UI element to be clicked")]
             public WPathStructure WPath { get; set; }
+
         }
 
         public UIClickCommand(AbstractScripter scripter) : base(scripter)
@@ -22,6 +25,7 @@ namespace G1ANT.Addon.UI.Commands
         {
             var element = UIElement.FromWPath(arguments.WPath);
             element?.Click();
+            Wait.UntilInputIsProcessed();
         }
     }
 }

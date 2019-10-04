@@ -129,7 +129,7 @@ namespace G1ANT.Addon.UI.Api
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
-        public void SpecialClick(int eventId = 9000, int? x = 0, int? y = 0)
+        public void MouseClick(int eventId = 9000, int? x = 0, int? y = 0)
         {
             var srcPoint = automationElement.GetClickablePoint();
 
@@ -147,11 +147,27 @@ namespace G1ANT.Addon.UI.Api
             else
             {
                 if (eventId == UIEventIdModel.MouseLeftClick.Id)
-                    automationElement.Click();
+                    automationElement.Click(true);
                 else if (eventId == UIEventIdModel.MouseRightClick.Id)
-                    automationElement.RightClick();
+                    automationElement.RightClick(true);
                 else if (eventId == UIEventIdModel.MouseDoubleClick.Id)
-                    automationElement.DoubleClick();
+                    automationElement.DoubleClick(true);
+            }
+        }
+
+        public void SendKey(int? eventId, string key)
+        {
+            if (!eventId.HasValue)
+                return;
+
+            if (eventId == UIEventIdModel.KeyPress.Id)
+            {
+                Keyboard.Type(key);
+                Wait.UntilInputIsProcessed();
+            }
+            else
+            {
+                Keyboard.TypeSimultaneously();
             }
         }
 

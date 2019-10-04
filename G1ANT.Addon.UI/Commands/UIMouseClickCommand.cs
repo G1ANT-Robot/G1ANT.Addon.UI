@@ -4,9 +4,9 @@ using G1ANT.Language;
 
 namespace G1ANT.Addon.UI.Commands
 {
-    [Command(Name = "ui.specialclick",
+    [Command(Name = "ui.mouseclick",
         Tooltip = "This command clicks with proper event (left click/right click/double click) a desktop application UI element specified by WPath structure")]
-    public class SpecialClickCommand : Command
+    public class MouseClickCommand : Command
     {
         public class Arguments : CommandArguments
         {
@@ -24,7 +24,7 @@ namespace G1ANT.Addon.UI.Commands
 
         }
 
-        public SpecialClickCommand(AbstractScripter scripter) : base(scripter)
+        public MouseClickCommand(AbstractScripter scripter) : base(scripter)
         {
         }
         
@@ -36,7 +36,7 @@ namespace G1ANT.Addon.UI.Commands
             var eventId = arguments.EventId.Value;
             var element = UIElement.FromWPath(arguments.WPath);
 
-            element?.SpecialClick(eventId, x, y);
+            element?.MouseClick(eventId, x, y);
         }
     }
 }
