@@ -82,6 +82,7 @@
     <Compile Include="Api\XPathUIElementBuilder.cs" />
     <Compile Include="Commands\UISendKeyCommand.cs" />
     <Compile Include="Commands\UIMouseClickCommand.cs" />
+    <Compile Include="Commands\UISetValueCommand.cs" />
     <Compile Include="ExtensionMethods\AutomationExtensions.cs" />
     <Compile Include="AutomationSingleton.cs" />
     <Compile Include="MainAddon.cs" />

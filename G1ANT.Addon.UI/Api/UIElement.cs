@@ -129,6 +129,26 @@ namespace G1ANT.Addon.UI.Api
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
+        public void SetValue(int controlTypeId, string newValue)
+        {
+            switch (controlTypeId)
+            {
+                case (int)ControlType.Edit:
+                    automationElement.AsTextBox().Text = newValue;
+                    break;
+                case (int)ControlType.ComboBox:
+                    automationElement.AsComboBox().Value = newValue;
+                    break;
+                case (int)ControlType.Slider:
+                    var slider = automationElement.AsSlider();
+                    slider.Value = Convert.ToDouble(newValue);
+                    slider.Thumb.Click();
+                    break;
+                default:
+                    throw new Exception("Control not implemented.");
+            }
+        }
+
         public void MouseClick(int eventId = 9000, int? x = 0, int? y = 0)
         {
             var srcPoint = automationElement.GetClickablePoint();

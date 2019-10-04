@@ -6,7 +6,7 @@ namespace G1ANT.Addon.UI.Commands
 {
     [Command(Name = "ui.mouseclick",
         Tooltip = "This command clicks with proper event (left click/right click/double click) a desktop application UI element specified by WPath structure")]
-    public class MouseClickCommand : Command
+    public class UIMouseClickCommand : Command
     {
         public class Arguments : CommandArguments
         {
@@ -24,7 +24,7 @@ namespace G1ANT.Addon.UI.Commands
 
         }
 
-        public MouseClickCommand(AbstractScripter scripter) : base(scripter)
+        public UIMouseClickCommand(AbstractScripter scripter) : base(scripter)
         {
         }
         
