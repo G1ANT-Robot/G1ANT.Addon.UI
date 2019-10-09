@@ -84,7 +84,6 @@
     <Compile Include="Commands\UIKeyUpCommand.cs" />
     <Compile Include="Commands\UIKeyPressCommand.cs" />
     <Compile Include="Commands\UIMouseClickCommand.cs" />
-    <Compile Include="Commands\UISetValueCommand.cs" />
     <Compile Include="Enums\EventTypes.cs" />
     <Compile Include="ExtensionMethods\AutomationExtensions.cs" />
     <Compile Include="AutomationSingleton.cs" />
