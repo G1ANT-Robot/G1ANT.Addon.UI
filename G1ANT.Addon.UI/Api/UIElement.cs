@@ -4,9 +4,8 @@ using System.Drawing;
 using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
-using FlaUI.Core.Identifiers;
 using FlaUI.Core.Input;
-using FlaUI.UIA3.Identifiers;
+using FlaUI.Core.WindowsAPI;
 using G1ANT.Addon.UI.XPathParser;
 using G1ANT.Addon.UI.ExtensionMethods;
 using G1ANT.Addon.UI.Models;
@@ -16,7 +15,7 @@ using ControlType = FlaUI.Core.Definitions.ControlType;
 using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
 using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
 using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
-using Rect = System.Windows.Rect;
+
 namespace G1ANT.Addon.UI.Api
 {
     public class UIElement
@@ -38,7 +37,7 @@ namespace G1ANT.Addon.UI.Api
         }
         public static UIElement RootElement { get; set; }    
 
-        protected AutomationElement automationElement;
+        protected AutomationElement automationElement;        
 
         private UIElement(){}
 
@@ -175,20 +174,19 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        public void SendKey(int? eventId, string key)
+        public void HoldKey(VirtualKeyShort keyShort)
         {
-            if (!eventId.HasValue)
-                return;
+            Keyboard.PressVirtualKeyCode((ushort) keyShort);
+        }
 
-            if (eventId == UIEventIdModel.KeyPress.Id)
-            {
-                Keyboard.Type(key);
-                Wait.UntilInputIsProcessed();
-            }
-            else
-            {
-                Keyboard.TypeSimultaneously();
-            }
+        public void Release(VirtualKeyShort keyShort)
+        {
+            Keyboard.ReleaseVirtualKeyCode((ushort)keyShort);
+        }
+
+        public void SendKey(VirtualKeyShort keyShort)
+        {
+            Keyboard.TypeVirtualKeyCode((ushort)keyShort);
         }
 
         public void Click()
