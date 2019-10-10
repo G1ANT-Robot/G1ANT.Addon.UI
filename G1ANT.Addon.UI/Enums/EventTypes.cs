@@ -2,11 +2,12 @@
 {
     public enum EventTypes
     {
+        Unknown,
         KeyUp,
         KeyDown,
         KeyPress,
-        LeftMouseClick,
-        RightMouseClick,
-        DoubleMouseClick
+        MouseLeftClick = 9000,
+        MouseRightClick = 9001,
+        MouseDoubleClick = 9002
     }
 }

@@ -6,6 +6,7 @@ using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
+using G1ANT.Addon.UI.Enums;
 using G1ANT.Addon.UI.XPathParser;
 using G1ANT.Addon.UI.ExtensionMethods;
 using G1ANT.Addon.UI.Models;
@@ -128,7 +129,7 @@ namespace G1ANT.Addon.UI.Api
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
-        public void MouseClick(int eventId = 9000, int? x = 0, int? y = 0)
+        public void MouseClick(EventTypes eventType = EventTypes.MouseLeftClick, int? x = 0, int? y = 0)
         {
             var srcPoint = automationElement.GetClickablePoint();
 
@@ -136,21 +137,22 @@ namespace G1ANT.Addon.UI.Api
             {
                 var relative = new Point(srcPoint.X - x.Value, srcPoint.Y - y.Value);
 
-                if (eventId == UIEventIdModel.MouseLeftClick.Id)
+                if (eventType == EventTypes.MouseLeftClick)
                     Mouse.Click(MouseButton.Left, relative);
-                else if (eventId == UIEventIdModel.MouseRightClick.Id)
+                else if (eventType == EventTypes.MouseRightClick)
                     Mouse.RightClick(relative);
-                else if (eventId == UIEventIdModel.MouseDoubleClick.Id)
+                else if (eventType == EventTypes.MouseDoubleClick)
                     Mouse.DoubleClick(MouseButton.Left, relative);
             }
             else
             {
-                if (eventId == UIEventIdModel.MouseLeftClick.Id)
+                if (eventType == EventTypes.MouseLeftClick)
                     automationElement.Click(true);
-                else if (eventId == UIEventIdModel.MouseRightClick.Id)
+                else if (eventType == EventTypes.MouseRightClick)
                     automationElement.RightClick(true);
-                else if (eventId == UIEventIdModel.MouseDoubleClick.Id)
+                else if (eventType == EventTypes.MouseDoubleClick)
                     automationElement.DoubleClick(true);
+                
             }
         }
 
