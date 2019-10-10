@@ -154,21 +154,6 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        public void HoldKey(VirtualKeyShort keyShort)
-        {
-            Keyboard.PressVirtualKeyCode((ushort) keyShort);
-        }
-
-        public void ReleaseKey(VirtualKeyShort keyShort)
-        {
-            Keyboard.ReleaseVirtualKeyCode((ushort)keyShort);
-        }
-
-        public void PressKey(VirtualKeyShort keyShort)
-        {
-            Keyboard.TypeVirtualKeyCode((ushort)keyShort);
-        }
-
         public void Click()
         {
             if (automationElement.IsPatternSupported(InvokePattern.Pattern) && automationElement.Patterns.Invoke.TryGetPattern(out var invokePattern))
