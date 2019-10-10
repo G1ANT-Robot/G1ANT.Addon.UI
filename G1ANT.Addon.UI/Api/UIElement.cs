@@ -159,12 +159,12 @@ namespace G1ANT.Addon.UI.Api
             Keyboard.PressVirtualKeyCode((ushort) keyShort);
         }
 
-        public void Release(VirtualKeyShort keyShort)
+        public void ReleaseKey(VirtualKeyShort keyShort)
         {
             Keyboard.ReleaseVirtualKeyCode((ushort)keyShort);
         }
 
-        public void SendKey(VirtualKeyShort keyShort)
+        public void PressKey(VirtualKeyShort keyShort)
         {
             Keyboard.TypeVirtualKeyCode((ushort)keyShort);
         }
