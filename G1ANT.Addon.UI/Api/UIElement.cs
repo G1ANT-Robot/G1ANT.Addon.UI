@@ -200,7 +200,15 @@ namespace G1ANT.Addon.UI.Api
 
         public void SetFocus()
         {
+
             automationElement.Focus();
+            var currentFocusedElement = AutomationSingleton.Automation.FocusedElement();
+            if (!automationElement.Equals(currentFocusedElement))
+            {
+                var parentWindow = automationElement.GetParentElementClosestToDesktopElement();
+                parentWindow?.Focus();
+                automationElement.Focus();                
+            }
         }
 
         public void SetText(string text, int timeout)
