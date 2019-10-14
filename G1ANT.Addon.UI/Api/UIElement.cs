@@ -9,7 +9,6 @@ using FlaUI.Core.WindowsAPI;
 using G1ANT.Addon.UI.Enums;
 using G1ANT.Addon.UI.XPathParser;
 using G1ANT.Addon.UI.ExtensionMethods;
-using G1ANT.Addon.UI.Models;
 using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
 using ControlType = FlaUI.Core.Definitions.ControlType;
