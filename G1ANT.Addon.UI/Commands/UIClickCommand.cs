@@ -24,8 +24,11 @@ namespace G1ANT.Addon.UI.Commands
         public void Execute(Arguments arguments)
         {
             var element = UIElement.FromWPath(arguments.WPath);
-            element?.Click();
-            Wait.UntilInputIsProcessed();
+            if(element != null)
+            {
+                element.Click();
+                Wait.UntilInputIsProcessed();
+            }
         }
     }
 }

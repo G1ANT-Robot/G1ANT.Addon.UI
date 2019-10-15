@@ -21,8 +21,8 @@ namespace G1ANT.Addon.UI.Commands
 
         public void Execute(Arguments arguments)
         {
-            var keyShort = (VirtualKeyShort) Enum.Parse(typeof(VirtualKeyShort), arguments.Value.Value);
-            Keyboard.TypeVirtualKeyCode((ushort)keyShort);
+            var keyShort = (ushort)Enum.Parse(typeof(VirtualKeyShort), arguments.Value.Value);
+            Keyboard.TypeVirtualKeyCode(keyShort);
             Wait.UntilInputIsProcessed();
         }
     }

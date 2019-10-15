@@ -18,10 +18,10 @@ namespace G1ANT.Addon.UI.Commands
             [Argument(Required = false, Tooltip = "Mouse event type.")]
             public TextStructure EventType { get; set; } = new TextStructure(9000);
 
-            [Argument(Required = false, Tooltip = "Position in X axis to click if AutomationElement is not found")]
+            [Argument(Required = false, Tooltip = "Relative position in X axis to click if AutomationElement is not found")]
             public IntegerStructure X { get; set; }
 
-            [Argument(Required = false, Tooltip = "Position in Y axis to click if AutomationElement is not found")]
+            [Argument(Required = false, Tooltip = "Relative position in Y axis to click if AutomationElement is not found")]
             public IntegerStructure Y { get; set; }
 
         }
@@ -41,9 +41,7 @@ namespace G1ANT.Addon.UI.Commands
                 eventId = (EventTypes)Enum.Parse(typeof(EventTypes), arguments.EventType.Value);
             }
             
-            var element = UIElement.FromWPath(arguments.WPath);
-
-            element?.MouseClick(eventId, x, y);
+            UIElement.FromWPath(arguments.WPath).MouseClick(eventId, x, y);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace G1ANT.Addon.UI.Api
         }
         public static UIElement RootElement { get; set; }    
 
-        protected AutomationElement automationElement;        
+        protected AutomationElement automationElement;
 
         private UIElement(){}
 
@@ -128,7 +128,7 @@ namespace G1ANT.Addon.UI.Api
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
-        public void MouseClick(EventTypes eventType = EventTypes.MouseLeftClick, int? x = 0, int? y = 0)
+        public void MouseClick(EventTypes eventType, int? x, int? y)
         {
             var srcPoint = automationElement.GetClickablePoint();
 
@@ -151,7 +151,6 @@ namespace G1ANT.Addon.UI.Api
                     automationElement.RightClick(true);
                 else if (eventType == EventTypes.MouseDoubleClick)
                     automationElement.DoubleClick(true);
-                
             }
         }
 
@@ -192,8 +191,11 @@ namespace G1ANT.Addon.UI.Api
             if (!automationElement.Equals(currentFocusedElement))
             {
                 var parentWindow = automationElement.GetParentElementClosestToDesktopElement();
-                parentWindow?.Focus();
-                automationElement.Focus();                
+                if (parentWindow != null)
+                {
+                    parentWindow.Focus();
+                    automationElement.Focus();
+                }
             }
         }
 
