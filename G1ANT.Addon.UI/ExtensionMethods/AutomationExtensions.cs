@@ -20,5 +20,19 @@ namespace G1ANT.Addon.UI.ExtensionMethods
             }
             return element.Properties.Name;
         }
+
+
+        public static AutomationElement GetParentElementClosestToDesktopElement(this AutomationElement element)
+        {
+            var desktop = AutomationSingleton.Automation.GetDesktop();
+            var currentElement = element;
+            while (!desktop.Equals(currentElement.Parent))
+            {
+                currentElement = currentElement.Parent;
+            }
+
+            return currentElement;
+        }
+
     }
 }

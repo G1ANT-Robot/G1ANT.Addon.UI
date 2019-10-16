@@ -4,8 +4,8 @@ using System.Drawing;
 using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
-using FlaUI.Core.Identifiers;
-using FlaUI.UIA3.Identifiers;
+using FlaUI.Core.Input;
+using G1ANT.Addon.UI.Enums;
 using G1ANT.Addon.UI.XPathParser;
 using G1ANT.Addon.UI.ExtensionMethods;
 using G1ANT.Addon.UI.Structures;
@@ -14,7 +14,7 @@ using ControlType = FlaUI.Core.Definitions.ControlType;
 using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
 using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
 using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
-using Rect = System.Windows.Rect;
+
 namespace G1ANT.Addon.UI.Api
 {
     public class UIElement
@@ -127,6 +127,44 @@ namespace G1ANT.Addon.UI.Api
             return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
+        public void MouseClick(EventTypes eventType, int? x, int? y)
+        {
+            var srcPoint = automationElement.GetClickablePoint();
+
+            if (x.HasValue && x != 0 && y.HasValue && y != 0 && srcPoint != Point.Empty)
+            {
+                var relative = new Point(srcPoint.X - x.Value, srcPoint.Y - y.Value);
+
+                switch (eventType)
+                {
+                    case EventTypes.MouseLeftClick:
+                        Mouse.Click(MouseButton.Left, relative);
+                        break;
+                    case EventTypes.MouseRightClick:
+                        Mouse.RightClick(relative);
+                        break;
+                    case EventTypes.MouseDoubleClick:
+                        Mouse.DoubleClick(MouseButton.Left, relative);
+                        break;
+                }
+            }
+            else
+            {
+                switch (eventType)
+                {
+                    case EventTypes.MouseLeftClick:
+                        automationElement.Click(true);
+                        break;
+                    case EventTypes.MouseRightClick:
+                        automationElement.RightClick(true);
+                        break;
+                    case EventTypes.MouseDoubleClick:
+                        automationElement.DoubleClick(true);
+                        break;
+                }
+            }
+        }
+
         public void Click()
         {
             if (automationElement.IsPatternSupported(InvokePattern.Pattern) && automationElement.Patterns.Invoke.TryGetPattern(out var invokePattern))
@@ -158,7 +196,18 @@ namespace G1ANT.Addon.UI.Api
 
         public void SetFocus()
         {
+
             automationElement.Focus();
+            var currentFocusedElement = AutomationSingleton.Automation.FocusedElement();
+            if (!automationElement.Equals(currentFocusedElement))
+            {
+                var parentWindow = automationElement.GetParentElementClosestToDesktopElement();
+                if (parentWindow != null)
+                {
+                    parentWindow.Focus();
+                    automationElement.Focus();
+                }
+            }
         }
 
         public void SetText(string text, int timeout)

@@ -80,6 +80,11 @@
   <ItemGroup>
     <Compile Include="Api\UIElement.cs" />
     <Compile Include="Api\XPathUIElementBuilder.cs" />
+    <Compile Include="Commands\UIKeyDownCommand.cs" />
+    <Compile Include="Commands\UIKeyUpCommand.cs" />
+    <Compile Include="Commands\UIKeyPressCommand.cs" />
+    <Compile Include="Commands\UIMouseClickCommand.cs" />
+    <Compile Include="Enums\EventTypes.cs" />
     <Compile Include="ExtensionMethods\AutomationExtensions.cs" />
     <Compile Include="AutomationSingleton.cs" />
     <Compile Include="MainAddon.cs" />
