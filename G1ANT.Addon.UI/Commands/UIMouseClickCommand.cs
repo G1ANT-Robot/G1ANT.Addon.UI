@@ -16,7 +16,7 @@ namespace G1ANT.Addon.UI.Commands
             public WPathStructure WPath { get; set; }
 
             [Argument(Required = false, Tooltip = "Mouse event type.")]
-            public TextStructure EventType { get; set; } = new TextStructure(9000);
+            public TextStructure EventType { get; set; } = new TextStructure("MouseLeftClick");
 
             [Argument(Required = false, Tooltip = "Relative position in X axis to click if AutomationElement is not found")]
             public IntegerStructure X { get; set; }

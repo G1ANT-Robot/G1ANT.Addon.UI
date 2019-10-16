@@ -5,8 +5,7 @@ using G1ANT.Language;
 
 namespace G1ANT.Addon.UI.Commands
 {
-    [Command(Name = "ui.keypress",
-        Tooltip = "This sends a key to a desktop application UI element specified by WPath structure")]
+    [Command(Name = "ui.keypress", Tooltip = "This sends a key to a desktop application UI element specified by WPath structure")]
     class UIKeyPressCommand : Command
     {
         public class Arguments : CommandArguments

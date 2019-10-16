@@ -5,7 +5,6 @@ using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Input;
-using FlaUI.Core.WindowsAPI;
 using G1ANT.Addon.UI.Enums;
 using G1ANT.Addon.UI.XPathParser;
 using G1ANT.Addon.UI.ExtensionMethods;
@@ -48,7 +47,7 @@ namespace G1ANT.Addon.UI.Api
 
         public static UIElement FromWPath(WPathStructure wPath)
         {
-            var xe = new XPathParser<object>().Parse(wPath.Value, new XPathUIElementBuilder(RootElement?.automationElement));
+            var xe = new XPathParser<object>().Parse(wPath.Value.Replace("<br>", Environment.NewLine), new XPathUIElementBuilder(RootElement?.automationElement));
             if (xe is AutomationElement element)
             {
                 return new UIElement(){ automationElement = element };
@@ -136,21 +135,33 @@ namespace G1ANT.Addon.UI.Api
             {
                 var relative = new Point(srcPoint.X - x.Value, srcPoint.Y - y.Value);
 
-                if (eventType == EventTypes.MouseLeftClick)
-                    Mouse.Click(MouseButton.Left, relative);
-                else if (eventType == EventTypes.MouseRightClick)
-                    Mouse.RightClick(relative);
-                else if (eventType == EventTypes.MouseDoubleClick)
-                    Mouse.DoubleClick(MouseButton.Left, relative);
+                switch (eventType)
+                {
+                    case EventTypes.MouseLeftClick:
+                        Mouse.Click(MouseButton.Left, relative);
+                        break;
+                    case EventTypes.MouseRightClick:
+                        Mouse.RightClick(relative);
+                        break;
+                    case EventTypes.MouseDoubleClick:
+                        Mouse.DoubleClick(MouseButton.Left, relative);
+                        break;
+                }
             }
             else
             {
-                if (eventType == EventTypes.MouseLeftClick)
-                    automationElement.Click(true);
-                else if (eventType == EventTypes.MouseRightClick)
-                    automationElement.RightClick(true);
-                else if (eventType == EventTypes.MouseDoubleClick)
-                    automationElement.DoubleClick(true);
+                switch (eventType)
+                {
+                    case EventTypes.MouseLeftClick:
+                        automationElement.Click(true);
+                        break;
+                    case EventTypes.MouseRightClick:
+                        automationElement.RightClick(true);
+                        break;
+                    case EventTypes.MouseDoubleClick:
+                        automationElement.DoubleClick(true);
+                        break;
+                }
             }
         }
 

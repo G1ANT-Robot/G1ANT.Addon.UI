@@ -28,11 +28,6 @@ namespace G1ANT.Addon.UI.ExtensionMethods
             var currentElement = element;
             while (!desktop.Equals(currentElement.Parent))
             {
-                if (currentElement.Parent == null)
-                {
-                    return element;
-                }
-
                 currentElement = currentElement.Parent;
             }
 
