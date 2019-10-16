@@ -47,7 +47,7 @@ namespace G1ANT.Addon.UI.Api
 
         public static UIElement FromWPath(WPathStructure wPath)
         {
-            var xe = new XPathParser<object>().Parse(wPath.Value.Replace("<br>", Environment.NewLine), new XPathUIElementBuilder(RootElement?.automationElement));
+            var xe = new XPathParser<object>().Parse(wPath.Value, new XPathUIElementBuilder(RootElement?.automationElement));
             if (xe is AutomationElement element)
             {
                 return new UIElement(){ automationElement = element };
