@@ -4,13 +4,12 @@ using G1ANT.Language;
 
 namespace G1ANT.Addon.UI.Commands
 {
-    [Command(Name = "ui.getcheckboxstate",
-        Tooltip = "This command returns targeted checkbox's state")]
+    [Command(Name = "ui.getcheckboxstate", Tooltip = "This command returns targeted checkbox's state")]
     public class UIGetCheckboxStateCommand : Command
     {
         public class Arguments : CommandArguments
         {
-            [Argument(Required = true, Tooltip = "Desktop application checkbox")]
+            [Argument(Required = true, Tooltip = "WPath to checkbox or radiobutton")]
             public WPathStructure WPath { get; set; }
 
             [Argument(Required = true, Tooltip = "Name of a variable where the command's result will be stored")]
