@@ -12,7 +12,7 @@ namespace G1ANT.Addon.UI.Panels
     [Panel(Name = "Windows Tree", DockingSide = DockingSide.Right, InitialAppear = false, Width = 400)]
     public partial class UIControlsPanel : RobotPanel
     {
-        private Form blinkingRectForm; 
+        private Form blinkingRectForm;
 
         public UIControlsPanel()
         {
@@ -33,7 +33,7 @@ namespace G1ANT.Addon.UI.Panels
         private void InitRootElement()
         {
             controlsTree.Nodes.Clear();
-            
+
             var root = AutomationSingleton.Automation.GetDesktop();
             var rootNode = controlsTree.Nodes.Add(root.FrameworkAutomationElement.Name);
             rootNode.Tag = root;
@@ -66,13 +66,13 @@ namespace G1ANT.Addon.UI.Panels
             if (element == null)
                 return null;
             var result = new StringBuilder();
-            
+
             if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
                 result.AppendLine($"id: {element.Properties.AutomationId.ValueOrDefault}");
-            
+
             result.AppendLine($"type: {CutControlType(element.ControlType.ToString())}");
             result.AppendLine($"typeid: {(int)element.ControlType}");
-        
+
             if (!string.IsNullOrWhiteSpace(element.Properties.ClassName.ValueOrDefault))
                 result.AppendLine($"class: {element.ClassName}");
             if (!string.IsNullOrWhiteSpace(element.Properties.Name.ValueOrDefault))
@@ -142,10 +142,15 @@ namespace G1ANT.Addon.UI.Panels
 
         private AutomationElement GetTopLevelWindow(AutomationElement element)
         {
+            var desktop = AutomationSingleton.Automation.GetDesktop();
+            if (element.Equals(desktop))
+            {
+                return element;
+            }
+
             var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
             var elementParent = treeWalker.GetParent(element);
-            
-            return elementParent == AutomationSingleton.Automation.GetDesktop() ? element : GetTopLevelWindow(elementParent);
+            return elementParent.Equals(desktop) ? element : GetTopLevelWindow(elementParent);
         }
 
         private void highlightToolStripMenuItem_Click(object sender, EventArgs e)
@@ -180,7 +185,7 @@ namespace G1ANT.Addon.UI.Panels
             }
             catch (Exception ex)
             {
-                RobotMessageBox.Show(ex.Message,"Error");
+                RobotMessageBox.Show(ex.Message, "Error");
             }
         }
 
@@ -225,7 +230,7 @@ namespace G1ANT.Addon.UI.Panels
         private void BlinkTimer_Tick(object sender, EventArgs e)
         {
             blinkingRectForm.Visible = !blinkingRectForm.Visible;
-            if(blinkTimes-- == 0)
+            if (blinkTimes-- == 0)
             {
                 blinkTimer.Enabled = false;
                 blinkingRectForm.Close();
