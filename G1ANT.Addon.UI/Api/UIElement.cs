@@ -14,6 +14,7 @@ using ControlType = FlaUI.Core.Definitions.ControlType;
 using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
 using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
 using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
+using FlaUI.Core.Definitions;
 
 namespace G1ANT.Addon.UI.Api
 {
@@ -34,11 +35,11 @@ namespace G1ANT.Addon.UI.Api
                 type = properties.ControlType.ValueOrDefault;
             }
         }
-        public static UIElement RootElement { get; set; }    
+        public static UIElement RootElement { get; set; }
 
         protected AutomationElement automationElement;
 
-        private UIElement(){}
+        private UIElement() { }
 
         public UIElement(AutomationElement element)
         {
@@ -50,9 +51,22 @@ namespace G1ANT.Addon.UI.Api
             var xe = new XPathParser<object>().Parse(wPath.Value, new XPathUIElementBuilder(RootElement?.automationElement));
             if (xe is AutomationElement element)
             {
-                return new UIElement(){ automationElement = element };
+                return new UIElement() { automationElement = element };
             }
             throw new NullReferenceException($"Cannot find UI element described by \"{wPath.Value}\".");
+        }
+
+        public ToggleState GetToggledState()
+        {
+            switch(automationElement.ControlType)
+            {
+                case ControlType.CheckBox:
+                    return automationElement.AsCheckBox().ToggleState;
+                case ControlType.RadioButton:
+                    return automationElement.AsRadioButton().IsChecked ? ToggleState.On : ToggleState.Off;
+                default:
+                    throw new Exception("Element is not CheckBox or RadioButton");
+            }
         }
 
         private IEnumerable<AutomationNodeDescription> GetStackNodes(AutomationElement rootElement)

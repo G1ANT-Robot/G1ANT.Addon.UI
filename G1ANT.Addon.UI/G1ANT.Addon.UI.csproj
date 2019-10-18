@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="Api\UIElement.cs" />
     <Compile Include="Api\XPathUIElementBuilder.cs" />
+    <Compile Include="Commands\UIGetCheckStateCommand.cs" />
     <Compile Include="Commands\UIKeyDownCommand.cs" />
     <Compile Include="Commands\UIKeyUpCommand.cs" />
     <Compile Include="Commands\UIKeyPressCommand.cs" />
