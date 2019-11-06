@@ -7,17 +7,16 @@ namespace G1ANT.Addon.UI.ExtensionMethods
     {
         public static string GetText(this AutomationElement element)
         {
-            object patternObj = null;
-            if (element.FrameworkAutomationElement.TryGetNativePattern(ValuePattern.Pattern, out patternObj))
+            if (element.Patterns.Value.IsSupported)
             {
-                var valuePattern = (ValuePattern)patternObj;
-                return valuePattern.Value;
+                return element.Patterns.Value.Pattern.Value;
             }
-            else if (element.FrameworkAutomationElement.TryGetNativePattern(TextPattern.Pattern, out patternObj))
+
+            if (element.Patterns.Text.IsSupported)
             {
-                var textPattern = (TextPattern)patternObj;
-                return textPattern.DocumentRange.GetText(-1).TrimEnd('\r');
+                return element.Patterns.Text.Pattern.DocumentRange.GetText(-1).TrimEnd('\r');
             }
+
             return element.Properties.Name;
         }
 
