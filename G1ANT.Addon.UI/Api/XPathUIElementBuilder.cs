@@ -77,11 +77,7 @@ namespace G1ANT.Addon.UI.Api
                 elementNode = treeWalker.GetNextSibling(elementNode);
                 index++;
             }
-
-            if (!elem.Equals(AutomationSingleton.Automation.GetDesktop()))
-                throw new ElementNotAvailableException();
-            else
-                return elem;
+            return elem;
         }
 
         protected AutomationElement FindFollowingSibling(AutomationElement elem, CompareFunc compare)
@@ -139,7 +135,7 @@ namespace G1ANT.Addon.UI.Api
                 {
                     return new CompareFunc((elem, index) =>
                     {
-                        return elem.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue) && propValue.Equals(right);
+                        return elem.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue) && propValue != null && propValue.Equals(right);
                     });
                 }
                 else if (left is UiAutomationElement en)
@@ -148,18 +144,14 @@ namespace G1ANT.Addon.UI.Api
                     {
                         return new CompareFunc((elem, index) =>
                         {
-                            string propValue = elem.FrameworkAutomationElement.ControlType.ToString().Replace("ControlType.", "");
-                            if (propValue != null)
-                                return propValue.Equals(right);
-                            return false;
+                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Replace("ControlType.", "").Equals(right);
                         });
                     }
                     if (UiAutomationElement.Id == en)
                     {
                         return new CompareFunc((elem, index) =>
                         {
-                            var propValue =  elem.FrameworkAutomationElement.ControlType.ValueOrDefault;
-                            return propValue.ToString().Equals(right); //Check if it's unknown?
+                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.ValueOrDefault.ToString().Equals(right);
                         });
                     }
                 }

@@ -25,7 +25,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
         {
             var desktop = AutomationSingleton.Automation.GetDesktop();
             var currentElement = element;
-            while (!desktop.Equals(currentElement.Parent))
+            while (currentElement != null && !desktop.Equals(currentElement.Parent))
             {
                 currentElement = currentElement.Parent;
             }
