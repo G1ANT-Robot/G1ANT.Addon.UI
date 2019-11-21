@@ -151,7 +151,7 @@ namespace G1ANT.Addon.UI.Api
                     {
                         return new CompareFunc((elem, index) =>
                         {
-                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.ValueOrDefault.ToString().Equals(right);
+                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Equals(right);
                         });
                     }
                 }
