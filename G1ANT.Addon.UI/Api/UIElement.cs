@@ -147,7 +147,7 @@ namespace G1ANT.Addon.UI.Api
 
             if (x.HasValue && x != 0 && y.HasValue && y != 0 && srcPoint != Point.Empty)
             {
-                var relative = new Point(srcPoint.X - x.Value, srcPoint.Y - y.Value);
+                var relative = new Point(automationElement.BoundingRectangle.X + x.Value, automationElement.BoundingRectangle.Y + y.Value);
 
                 switch (eventType)
                 {
