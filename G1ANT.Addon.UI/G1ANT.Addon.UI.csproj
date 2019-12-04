@@ -88,6 +88,7 @@
     <Compile Include="Enums\EventTypes.cs" />
     <Compile Include="ExtensionMethods\AutomationExtensions.cs" />
     <Compile Include="AutomationSingleton.cs" />
+    <Compile Include="Helpers\VirtualKeyShortConverter.cs" />
     <Compile Include="MainAddon.cs" />
     <Compile Include="Panels\UIControlsPanel.cs">
       <SubType>UserControl</SubType>

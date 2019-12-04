@@ -1,6 +1,5 @@
-﻿using System;
-using FlaUI.Core.Input;
-using FlaUI.Core.WindowsAPI;
+﻿using FlaUI.Core.Input;
+using G1ANT.Addon.UI.Helpers;
 using G1ANT.Language;
 
 namespace G1ANT.Addon.UI.Commands
@@ -23,7 +22,8 @@ namespace G1ANT.Addon.UI.Commands
 
         public void Execute(Arguments arguments)
         {
-            var keyShort = (ushort) Enum.Parse(typeof(VirtualKeyShort), arguments.Value.Value);
+            var key = VirtualKeyShortConverter.GetVirtualKeys(arguments.Value.Value);
+            var keyShort = (ushort)key;
             Keyboard.PressVirtualKeyCode(keyShort);
             Wait.UntilInputIsProcessed();
         }
