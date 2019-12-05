@@ -19,9 +19,8 @@ namespace G1ANT.Addon.UI.Helpers
                     return (VirtualKeyShort) (Keys) Enum.Parse(typeof(Keys), singleKey);
                 }
             }
-
-            var keys = (Keys) Enum.Parse(typeof(Keys), value.ToString());
-            return (VirtualKeyShort) Enum.Parse(typeof(VirtualKeyShort), keys.ToString(), true);
+            
+            return (VirtualKeyShort) Enum.Parse(typeof(VirtualKeyShort), value.ToString(), true);
         }
     }
 }
