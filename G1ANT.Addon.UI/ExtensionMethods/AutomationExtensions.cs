@@ -1,4 +1,5 @@
-﻿using System.Windows.Automation;
+﻿using FlaUI.Core.AutomationElements;
+using FlaUI.UIA3.Patterns;
 
 namespace G1ANT.Addon.UI.ExtensionMethods
 {
@@ -6,17 +7,31 @@ namespace G1ANT.Addon.UI.ExtensionMethods
     {
         public static string GetText(this AutomationElement element)
         {
-            if (element.TryGetCurrentPattern(ValuePattern.Pattern, out object patternObj))
+            if (element.Patterns.Value.IsSupported)
             {
-                var valuePattern = (ValuePattern)patternObj;
-                return valuePattern.Current.Value;
+                return element.Patterns.Value.Pattern.Value;
             }
-            else if (element.TryGetCurrentPattern(TextPattern.Pattern, out patternObj))
+
+            if (element.Patterns.Text.IsSupported)
             {
-                var textPattern = (TextPattern)patternObj;
-                return textPattern.DocumentRange.GetText(-1).TrimEnd('\r');
+                return element.Patterns.Text.Pattern.DocumentRange.GetText(-1).TrimEnd('\r');
             }
-            return element.Current.Name;
+
+            return element.Properties.Name;
         }
+
+
+        public static AutomationElement GetParentElementClosestToDesktopElement(this AutomationElement element)
+        {
+            var desktop = AutomationSingleton.Automation.GetDesktop();
+            var currentElement = element;
+            while (currentElement != null && !desktop.Equals(currentElement.Parent))
+            {
+                currentElement = currentElement.Parent;
+            }
+
+            return currentElement;
+        }
+
     }
 }

@@ -1,7 +1,8 @@
-using System;
+using G1ANT.Addon.UI.Api;
+using G1ANT.Addon.UI.Structures;
 using G1ANT.Language;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Commands
 {
     [Command(Name = "ui.settext",
         Tooltip = "This command inserts text into a specified UI element of a desktop application window")]
@@ -23,10 +24,7 @@ namespace G1ANT.Addon.UI
         public void Execute(Arguments arguments)
         {
             var element = UIElement.FromWPath(arguments.WPath);
-            if (element != null)
-            {
-                element.SetText(arguments.Text.Value, (int)arguments.Timeout.Value.TotalMilliseconds);
-            }
+            element.SetText(arguments.Text.Value, (int)arguments.Timeout.Value.TotalMilliseconds);
         }
     }
 }

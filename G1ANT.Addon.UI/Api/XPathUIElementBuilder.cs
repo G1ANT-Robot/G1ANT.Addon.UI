@@ -1,21 +1,22 @@
 ﻿using System;
-using CodePlex.XPathParser;
-using System.Windows.Automation;
 using System.Collections.Generic;
-
-using CompareFunc = System.Func<
-    System.Windows.Automation.AutomationElement,
-    int,
-    bool>;
+using FlaUI.Core;
+using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Exceptions;
+using FlaUI.Core.Identifiers;
+using FlaUI.UIA3.Identifiers;
+using G1ANT.Addon.UI.XPathParser;
+using CompareFunc = System.Func<FlaUI.Core.AutomationElements.AutomationElement, int, bool>;
 using GetElementFunc = System.Func<
-    System.Windows.Automation.AutomationElement,
-    System.Windows.Automation.AutomationElement>;
+    FlaUI.Core.AutomationElements.AutomationElement,
+    FlaUI.Core.AutomationElements.AutomationElement>;
 using FindElementFunc = System.Func<
-    System.Windows.Automation.AutomationElement,
-    System.Func<System.Windows.Automation.AutomationElement, int, bool>,
-    System.Windows.Automation.AutomationElement>;
+    FlaUI.Core.AutomationElements.AutomationElement,
+    System.Func<FlaUI.Core.AutomationElements.AutomationElement, int, bool>,
+    FlaUI.Core.AutomationElements.AutomationElement>;
+using NotSupportedException = System.NotSupportedException;
 
-namespace G1ANT.Addon.UI
+namespace G1ANT.Addon.UI.Api
 {
     public class XPathUIElementBuilder : IXPathBuilder<object>
     {
@@ -25,9 +26,16 @@ namespace G1ANT.Addon.UI
             ProgrammaticName,
         }
 
+        public AutomationElement Root { get; }
+        public XPathUIElementBuilder(AutomationElement root = null)
+        {
+            Root = root ?? AutomationSingleton.Automation.GetDesktop();
+        }
+
         protected AutomationElement FindDescendant(AutomationElement elem, CompareFunc compare)
         {
-            AutomationElement elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
+            var treeWalker = GetTreeWalker(elem);
+            var elementNode = treeWalker.GetFirstChild(elem);
             int index = 0;
             while (elementNode != null)
             {
@@ -42,15 +50,22 @@ namespace G1ANT.Addon.UI
                     return descendantElement;
                 }
 
-                elementNode = TreeWalker.ControlViewWalker.GetNextSibling(elementNode);
+                elementNode = treeWalker.GetNextSibling(elementNode);
                 index++;
             }
             return null;
         }
 
+        private ITreeWalker GetTreeWalker(AutomationElement elem)
+        {
+            var rootElement = elem ?? Root;
+            return rootElement.Automation.TreeWalkerFactory.GetControlViewWalker();
+        }
+
         protected AutomationElement FindChild(AutomationElement elem, CompareFunc compare)
         {
-            var elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
+            var treeWalker = GetTreeWalker(elem);
+            var elementNode = treeWalker.GetFirstChild(elem);
             var index = 0;
             while (elementNode != null)
             {
@@ -59,15 +74,16 @@ namespace G1ANT.Addon.UI
                     return elementNode;
                 }
 
-                elementNode = TreeWalker.ControlViewWalker.GetNextSibling(elementNode);
+                elementNode = treeWalker.GetNextSibling(elementNode);
                 index++;
             }
-            throw new ElementNotAvailableException();
+            return elem;
         }
 
         protected AutomationElement FindFollowingSibling(AutomationElement elem, CompareFunc compare)
         {
-            var elementNode = TreeWalker.ControlViewWalker.GetFirstChild(elem);
+            var treeWalker = GetTreeWalker(elem);
+            var elementNode = treeWalker.GetFirstChild(elem);
             var index = 0;
             while (elementNode != null)
             {
@@ -76,7 +92,7 @@ namespace G1ANT.Addon.UI
                     return elementNode;
                 }
 
-                elementNode = TreeWalker.ControlViewWalker.GetNextSibling(elementNode);
+                elementNode = treeWalker.GetNextSibling(elementNode);
                 index++;
             }
             throw new ElementNotAvailableException();
@@ -87,14 +103,6 @@ namespace G1ANT.Addon.UI
             if (compare(elem, -1))
                 return elem;
             return FindDescendant(elem, compare);
-        }
-
-        public AutomationElement Root { get; } = AutomationElement.RootElement;
-        public XPathUIElementBuilder(AutomationElement root = null)
-        {
-            ControlType.Button.GetType();
-            if (root != null)
-                Root = root;
         }
 
         public void StartBuild()
@@ -123,15 +131,12 @@ namespace G1ANT.Addon.UI
         {
             if (op == XPathOperator.Eq)
             {
-                if (left is AutomationProperty property)
+                if (left is PropertyId propertyId)
                 {
                     return new CompareFunc((elem, index) =>
-                     {
-                         var propValue = elem.GetCurrentPropertyValue(property, true);
-                         if (propValue != null)
-                             return propValue.Equals(right);
-                         return false;
-                     });
+                    {
+                        return elem.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue) && propValue != null && propValue.Equals(right);
+                    });
                 }
                 else if (left is UiAutomationElement en)
                 {
@@ -139,20 +144,14 @@ namespace G1ANT.Addon.UI
                     {
                         return new CompareFunc((elem, index) =>
                         {
-                            string propValue = elem.Current.ControlType?.ProgrammaticName.Replace("ControlType.", "");
-                            if (propValue != null)
-                                return propValue.Equals(right);
-                            return false;
+                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Replace("ControlType.", "").Equals(right);
                         });
                     }
                     if (UiAutomationElement.Id == en)
                     {
                         return new CompareFunc((elem, index) =>
                         {
-                            int? propValue = elem.Current.ControlType?.Id;
-                            if (propValue.HasValue)
-                                return propValue.ToString().Equals(right);
-                            return false;
+                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Equals(right);
                         });
                     }
                 }
@@ -193,11 +192,11 @@ namespace G1ANT.Addon.UI
             {
                 string lowerCaseName = name.ToLower();
                 if (lowerCaseName == "id")
-                    return AutomationElement.AutomationIdProperty;
+                    return AutomationObjectIds.AutomationIdProperty;
                 if (lowerCaseName == "name")
-                    return AutomationElement.NameProperty;
+                    return AutomationObjectIds.NameProperty;
                 if (lowerCaseName == "class")
-                    return AutomationElement.ClassNameProperty;
+                    return AutomationObjectIds.ClassNameProperty;
                 if (lowerCaseName == "type")
                     return UiAutomationElement.ProgrammaticName;
                 if (lowerCaseName == "typeid")
@@ -209,13 +208,11 @@ namespace G1ANT.Addon.UI
 
         public object JoinStep(object left, object right)
         {
-            if (left is AutomationElement elem &&
-                right is GetElementFunc func)
+            if (left is AutomationElement elem && right is GetElementFunc func)
             {
                 return func(elem);
             }
-            if (left is GetElementFunc inner &&
-                right is GetElementFunc outer)
+            if (left is GetElementFunc inner && right is GetElementFunc outer)
             {
                 GetElementFunc retFunc = (element) =>
                 {
@@ -231,8 +228,7 @@ namespace G1ANT.Addon.UI
 
         public object Predicate(object node, object condition, bool reverseStep)
         {
-            if (node is FindElementFunc outer1 &&
-                condition is CompareFunc inner1)
+            if (node is FindElementFunc outer1 && condition is CompareFunc inner1)
             {
                 GetElementFunc func = (elem) =>
                 {
@@ -240,8 +236,7 @@ namespace G1ANT.Addon.UI
                 };
                 return func;
             }
-            else if (node is FindElementFunc outer2 &&
-                condition is int value)
+            else if (node is FindElementFunc outer2 && condition is int value)
             {
                 GetElementFunc func = (elem) =>
                 {
@@ -259,11 +254,17 @@ namespace G1ANT.Addon.UI
 
         public object Function(string prefix, string name, IList<object> args)
         {
-            if (args.Count == 2 && IsXpathFunction(name) && args[0] is AutomationProperty property && args[1] is string text)
+            if (args.Count == 2 && IsXpathFunction(name) && args[0] is PropertyId propertyId && args[1] is string text)
             {
                 CompareFunc func = (elem, index) =>
                 {
-                    return elem.GetCurrentPropertyValue(property, true) is string str && IsConditionMet(name, str, text);
+
+                    if (elem.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue))
+                    {
+                        return propValue is string str && IsConditionMet(name, str, text);
+                    }
+
+                    return false;
                 };
                 return func;
             }
