@@ -82,7 +82,7 @@ namespace G1ANT.Addon.UI.Api
 
                 var elementParent = walker.GetParent(node);
 
-                if (elementParent == automationRoot || elementParent == null)
+                if (elementParent.Equals(automationRoot) || elementParent == null)
                 {
                     break;
                 }
