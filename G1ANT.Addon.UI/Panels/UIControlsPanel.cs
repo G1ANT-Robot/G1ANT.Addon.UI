@@ -46,9 +46,17 @@ namespace G1ANT.Addon.UI.Panels
 
         }
 
-        private string CutControlType(string name)
+        private string GetControlTypeString(AutomationElement element)
         {
-            return string.IsNullOrEmpty(name) ? "" : name.Replace("ControlType.", "");
+            try
+            {
+                var controlType = element.ControlType.ToString();
+                return string.IsNullOrEmpty(controlType) ? "" : controlType.Replace("ControlType.", "");
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         private string GetTreeNodeName(AutomationElement element)
@@ -58,7 +66,7 @@ namespace G1ANT.Addon.UI.Panels
             string id = "";
             if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
                 id = $" #{element.Properties.AutomationId.ValueOrDefault}";
-            return $"{CutControlType(element.ControlType.ToString())}{id} \"{element.Properties.Name.ValueOrDefault}\"";
+            return $"{GetControlTypeString(element)}{id} \"{element.Properties.Name.ValueOrDefault}\"";
         }
 
         private string GetTreeNodeTooltip(AutomationElement element, int index)
@@ -70,8 +78,12 @@ namespace G1ANT.Addon.UI.Panels
             if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
                 result.AppendLine($"id: {element.Properties.AutomationId.ValueOrDefault}");
 
-            result.AppendLine($"type: {CutControlType(element.ControlType.ToString())}");
-            result.AppendLine($"typeid: {(int)element.ControlType}");
+            result.AppendLine($"type: {GetControlTypeString(element)}");
+            try
+            {
+                result.AppendLine($"typeid: {(int)element.ControlType}");
+            }
+            catch { }
 
             if (!string.IsNullOrWhiteSpace(element.Properties.ClassName.ValueOrDefault))
                 result.AppendLine($"class: {element.ClassName}");
@@ -88,17 +100,24 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (e.Node.Tag is AutomationElement element)
                 {
-                    var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
+                    var treeWalker = element.Automation.TreeWalkerFactory.GetContentViewWalker();
                     var elem = treeWalker.GetFirstChild(element);
                     var i = 0;
                     while (elem != null)
                     {
-                        var node = e.Node.Nodes.Add(GetTreeNodeName(elem));
-                        node.ToolTipText = GetTreeNodeTooltip(elem, i++);
-                        node.Tag = elem;
-                        node.Nodes.Add("");
+                        try
+                        {
+                            var node = e.Node.Nodes.Add(GetTreeNodeName(elem));
+                            node.ToolTipText = GetTreeNodeTooltip(elem, i++);
+                            node.Tag = elem;
+                            node.Nodes.Add("");
 
-                        elem = treeWalker.GetNextSibling(elem);
+                            elem = treeWalker.GetNextSibling(elem);
+                        }
+                        catch (Exception ex)
+                        {
+                            scripter?.Logger?.Warn($"Cannot display Window Tree item", ex);
+                        }
                     }
                 }
             }
