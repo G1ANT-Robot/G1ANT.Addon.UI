@@ -18,7 +18,7 @@ using FlaUI.Core.Definitions;
 
 namespace G1ANT.Addon.UI.Api
 {
-    public class UIElement
+    public partial class UIElement
     {
         internal class AutomationNodeDescription
         {
@@ -48,12 +48,17 @@ namespace G1ANT.Addon.UI.Api
 
         public static UIElement FromWPath(WPathStructure wPath)
         {
-            var xe = new XPathParser<object>().Parse(wPath.Value, new XPathUIElementBuilder(RootElement?.automationElement));
+            return FromWPath(wPath.Value);
+        } 
+
+        public static UIElement FromWPath(string wPath)
+        {
+            var xe = new XPathParser<object>().Parse(wPath, new XPathUIElementBuilder(RootElement?.automationElement));
             if (xe is AutomationElement element)
             {
                 return new UIElement() { automationElement = element };
             }
-            throw new NullReferenceException($"Cannot find UI element described by \"{wPath.Value}\".");
+            throw new NullReferenceException($"Cannot find UI element described by \"{wPath}\".");
         }
 
         public ToggleState GetToggledState()
@@ -210,7 +215,6 @@ namespace G1ANT.Addon.UI.Api
 
         public void SetFocus()
         {
-
             automationElement.Focus();
             var currentFocusedElement = AutomationSingleton.Automation.FocusedElement();
             if (!automationElement.Equals(currentFocusedElement))

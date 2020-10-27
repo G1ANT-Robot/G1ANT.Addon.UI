@@ -127,34 +127,69 @@ namespace G1ANT.Addon.UI.Api
             throw new NotSupportedException($"Number '{value}' is not supported.");
         }
 
-        public object Operator(XPathOperator op, object left, object right)
+        protected object EqOperator(object left, object right)
         {
-            if (op == XPathOperator.Eq)
+            if (left is PropertyId propertyId)
             {
-                if (left is PropertyId propertyId)
+                return new CompareFunc((elem, index) =>
+                {
+                    return elem.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue) && propValue != null && propValue.Equals(right);
+                });
+            }
+            else if (left is UiAutomationElement en)
+            {
+                if (UiAutomationElement.ProgrammaticName == en)
                 {
                     return new CompareFunc((elem, index) =>
                     {
-                        return elem.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue) && propValue != null && propValue.Equals(right);
+                        return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Replace("ControlType.", "").Equals(right);
                     });
                 }
-                else if (left is UiAutomationElement en)
+                if (UiAutomationElement.Id == en)
                 {
-                    if (UiAutomationElement.ProgrammaticName == en)
+                    return new CompareFunc((elem, index) =>
                     {
-                        return new CompareFunc((elem, index) =>
-                        {
-                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Replace("ControlType.", "").Equals(right);
-                        });
-                    }
-                    if (UiAutomationElement.Id == en)
-                    {
-                        return new CompareFunc((elem, index) =>
-                        {
-                            return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Equals(right);
-                        });
-                    }
+                        return elem.Properties.ControlType.IsSupported && elem.Properties.ControlType.Value.ToString().Equals(right);
+                    });
                 }
+            }
+            throw new NotSupportedException("Left side of 'equal' operator has not been recognized.");
+        }
+
+        protected object AndOperator(object left, object right)
+        {
+            if (left is CompareFunc cmp1 && right is CompareFunc cmp2)
+            {
+                return new CompareFunc((elem, index) =>
+                {
+                    return cmp1(elem, index) && cmp2(elem, index);
+                });
+            }
+            throw new NotSupportedException("Left or right side of 'and' operator has not been recognized.");
+        }
+
+        protected object OrOperator(object left, object right)
+        {
+            if (left is CompareFunc cmp1 && right is CompareFunc cmp2)
+            {
+                return new CompareFunc((elem, index) =>
+                {
+                    return cmp1(elem, index) || cmp2(elem, index);
+                });
+            }
+            throw new NotSupportedException("Left or right side of 'or' operator has not been recognized.");
+        }
+
+        public object Operator(XPathOperator op, object left, object right)
+        {
+            switch (op)
+            {
+                case XPathOperator.Eq:
+                    return EqOperator(left, right);
+                case XPathOperator.And:
+                    return AndOperator(left, right);
+                case XPathOperator.Or:
+                    return OrOperator(left, right);
             }
             throw new NotSupportedException($"Operator {op.ToString()} is not supported.");
         }
