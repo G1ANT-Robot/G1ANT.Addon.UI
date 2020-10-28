@@ -14,15 +14,16 @@ namespace G1ANT.Addon.UI.Api.Patterns
 
         public UILegacyIAccessiblePattern(AutomationElement automationElement) : base(automationElement)
         {
-            if (automationElement.Patterns.LegacyIAccessible.Pattern.Value.IsSupported)
+            var pattern = automationElement.Patterns.LegacyIAccessible.Pattern;
+            if (pattern.Value.IsSupported)
                 indexes.Add(PropValue);
-            if (automationElement.Patterns.LegacyIAccessible.Pattern.DefaultAction.IsSupported)
+            if (pattern.DefaultAction.IsSupported)
                 indexes.Add(PropDefaultAction);
-            if (automationElement.Patterns.LegacyIAccessible.Pattern.Description.IsSupported)
+            if (pattern.Description.IsSupported)
                 indexes.Add(PropDescription);
-            if (automationElement.Patterns.LegacyIAccessible.Pattern.Help.IsSupported)
+            if (pattern.Help.IsSupported)
                 indexes.Add(PropHelp);
-            if (automationElement.Patterns.LegacyIAccessible.Pattern.Name.IsSupported)
+            if (pattern.Name.IsSupported)
                 indexes.Add(PropName);
         }
 
@@ -30,18 +31,19 @@ namespace G1ANT.Addon.UI.Api.Patterns
 
         public override object GetPropertyValue(string name)
         {
+            var pattern = automationElement.Patterns.LegacyIAccessible.Pattern;
             switch (name.ToLower())
             {
                 case PropValue:
-                    return automationElement.Patterns.LegacyIAccessible.Pattern.Value.ValueOrDefault;
+                    return pattern.Value.ValueOrDefault;
                 case PropDefaultAction:
-                    return automationElement.Patterns.LegacyIAccessible.Pattern.DefaultAction.ValueOrDefault;
+                    return pattern.DefaultAction.ValueOrDefault;
                 case PropDescription:
-                    return automationElement.Patterns.LegacyIAccessible.Pattern.Description.ValueOrDefault;
+                    return pattern.Description.ValueOrDefault;
                 case PropHelp:
-                    return automationElement.Patterns.LegacyIAccessible.Pattern.Help.ValueOrDefault;
+                    return pattern.Help.ValueOrDefault;
                 case PropName:
-                    return automationElement.Patterns.LegacyIAccessible.Pattern.Name.ValueOrDefault;
+                    return pattern.Name.ValueOrDefault;
             }
             throw new ArgumentException($"Unknown index '{name}'");
         }

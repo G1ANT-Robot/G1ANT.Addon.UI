@@ -6,6 +6,8 @@ using System.Drawing;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using G1ANT.Addon.UI.Api;
+using System.Linq;
+using G1ANT.Addon.UI.Structures;
 
 namespace G1ANT.Addon.UI.Panels
 {
@@ -36,7 +38,7 @@ namespace G1ANT.Addon.UI.Panels
 
             var root = AutomationSingleton.Automation.GetDesktop();
             var rootNode = controlsTree.Nodes.Add(root.FrameworkAutomationElement.Name);
-            rootNode.Tag = root;
+            rootNode.Tag = new UIElement(root);
             rootNode.Nodes.Add("");
             rootNode.Expand();
         }
@@ -98,10 +100,10 @@ namespace G1ANT.Addon.UI.Panels
             e.Node.Nodes.Clear();
             try
             {
-                if (e.Node.Tag is AutomationElement element)
+                if (e.Node.Tag is UIElement element)
                 {
-                    var treeWalker = element.Automation.TreeWalkerFactory.GetContentViewWalker();
-                    var elem = treeWalker.GetFirstChild(element);
+                    var treeWalker = element.AutomationElement.Automation.TreeWalkerFactory.GetContentViewWalker();
+                    var elem = treeWalker.GetFirstChild(element.AutomationElement);
                     var i = 0;
                     while (elem != null)
                     {
@@ -109,7 +111,7 @@ namespace G1ANT.Addon.UI.Panels
                         {
                             var node = e.Node.Nodes.Add(GetTreeNodeName(elem));
                             node.ToolTipText = GetTreeNodeTooltip(elem, i++);
-                            node.Tag = elem;
+                            node.Tag = new UIElement(elem);
                             node.Nodes.Add("");
 
                             elem = treeWalker.GetNextSibling(elem);
@@ -131,9 +133,8 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (controlsTree.SelectedNode != null)
                 {
-                    if (controlsTree.SelectedNode.Tag is AutomationElement automationElement)
+                    if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        var uiElement = new UIElement(automationElement);
                         MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiElement.ToWPath()}{SpecialChars.Text}");
                     }
                 }
@@ -178,13 +179,12 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (controlsTree.SelectedNode != null)
                 {
-                    if (controlsTree.SelectedNode.Tag is AutomationElement automationElement)
+                    if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        UIElement uiELement = new UIElement(automationElement);
-                        var element = UIElement.FromWPath(uiELement.ToWPath());
+                        var element = UIElement.FromWPath(uiElement.ToWPath());
                         if (element != null)
                         {
-                            var window = GetTopLevelWindow(automationElement);
+                            var window = GetTopLevelWindow(uiElement.AutomationElement);
                             if (window != null)
                             {
                                 var iHandle = window.FrameworkAutomationElement.NativeWindowHandle;
@@ -264,6 +264,38 @@ namespace G1ANT.Addon.UI.Panels
             if (e.Button == MouseButtons.Right)
             {
                 contextMenuStrip.Show(Control.MousePosition);
+            }
+        }
+
+        private void controlsTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            var selectedNode = controlsTree.SelectedNode;
+            var selectedModel = selectedNode?.Tag;
+
+            propertiesGrid.Rows.Clear();
+
+            if (selectedModel is UIElement uiElement)
+            {
+                var uiComponent = new UIComponentStructure(uiElement, "", scripter);
+
+                var properties = uiComponent.Indexes;
+                if (properties?.Any() == true)
+                {
+                    propertiesGrid.Rows.AddRange(
+                        properties
+                            .Select(p => new System.Windows.Forms.DataGridViewRow()
+                            {
+                                Cells = {
+                                    new DataGridViewTextBoxCell() { Value = p },
+                                    new DataGridViewTextBoxCell() { 
+                                        Value = uiComponent.Get(p).ToString(), 
+                                        ToolTipText = uiComponent.Get(p).ToString() 
+                                    },
+                                },
+                            })
+                            .ToArray()
+                    );
+                }
             }
         }
     }

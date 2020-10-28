@@ -84,6 +84,8 @@
     <Compile Include="Api\Patterns\IUIPattern.cs" />
     <Compile Include="Api\Patterns\UILegacyIAccessiblePattern.cs" />
     <Compile Include="Api\Patterns\UIPatternBase.cs" />
+    <Compile Include="Api\Patterns\UISelectionItemPattern.cs" />
+    <Compile Include="Api\Patterns\UISelectionPattern.cs" />
     <Compile Include="Api\UIElement+Properties.cs" />
     <Compile Include="Api\UIElement.cs" />
     <Compile Include="Api\Patterns\UIValuePattern.cs" />

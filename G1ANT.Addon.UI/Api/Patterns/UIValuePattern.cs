@@ -18,12 +18,13 @@ namespace G1ANT.Addon.UI.Api.Patterns
 
         public override object GetPropertyValue(string name)
         {
+            var pattern = automationElement.Patterns.Value.Pattern;
             switch (name.ToLower())
             {
                 case PropIsReadOnly:
-                    return automationElement.Patterns.Value.Pattern.IsReadOnly.Value;
+                    return pattern.IsReadOnly.Value;
                 case PropValue:
-                    return automationElement.Patterns.Value.Pattern.Value.Value;
+                    return pattern.Value.Value;
             }
             throw new ArgumentException($"Unknown index '{name}'");
         }

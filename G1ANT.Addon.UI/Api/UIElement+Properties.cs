@@ -33,7 +33,7 @@ namespace G1ANT.Addon.UI.Api
         {
             get
             {
-                if (automationElement == null)
+                if (AutomationElement == null)
                     throw new NullReferenceException("Underlying automation element has not been initialised");
 
                 if (availableProperties == null)
@@ -79,9 +79,12 @@ namespace G1ANT.Addon.UI.Api
             throw new ArgumentException($"Index '{name}' is read only");
         }
 
+        private IList<UIElement> cachedChildren;
         private IList<UIElement> GetChildren()
         {
-            return automationElement.FindAllChildren().Select(x => new UIElement(x)).ToList();
+            if (cachedChildren == null)
+                cachedChildren = AutomationElement.FindAllChildren().Select(x => new UIElement(x)).ToList();
+            return cachedChildren;
         }
 
         private bool IsAutomationPropertySupported(string propName)
@@ -109,7 +112,7 @@ namespace G1ANT.Addon.UI.Api
             if (propDef == null)
                 return null;
 
-            return propDef.GetValue(automationElement.Properties);
+            return propDef.GetValue(AutomationElement.Properties);
         }
 
         private List<UIPatternWrapper> supportedPatterns;
@@ -118,10 +121,14 @@ namespace G1ANT.Addon.UI.Api
             if (supportedPatterns == null)
             {
                 supportedPatterns = new List<UIPatternWrapper>();
-                if (automationElement.Patterns.Value.IsSupported)
-                    supportedPatterns.Add(new UIPatternWrapper(new UIValuePattern(automationElement)));
-                if (automationElement.Patterns.LegacyIAccessible.IsSupported)
-                    supportedPatterns.Add(new UIPatternWrapper(new UILegacyIAccessiblePattern(automationElement)));
+                if (AutomationElement.Patterns.Value.IsSupported)
+                    supportedPatterns.Add(new UIPatternWrapper(new UIValuePattern(AutomationElement)));
+                if (AutomationElement.Patterns.LegacyIAccessible.IsSupported)
+                    supportedPatterns.Add(new UIPatternWrapper(new UILegacyIAccessiblePattern(AutomationElement)));
+                if (AutomationElement.Patterns.Selection.IsSupported)
+                    supportedPatterns.Add(new UIPatternWrapper(new UISelectionPattern(AutomationElement)));
+                if (AutomationElement.Patterns.SelectionItem.IsSupported)
+                    supportedPatterns.Add(new UIPatternWrapper(new UISelectionItemPattern(AutomationElement)));
             }
             return supportedPatterns;
         }
