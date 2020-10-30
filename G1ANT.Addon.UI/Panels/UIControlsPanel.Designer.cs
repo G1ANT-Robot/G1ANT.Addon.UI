@@ -37,9 +37,9 @@
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.highlightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesGrid = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.Property = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.propertiesGrid)).BeginInit();
@@ -130,31 +130,14 @@
             this.propertiesGrid.Location = new System.Drawing.Point(0, 0);
             this.propertiesGrid.MultiSelect = false;
             this.propertiesGrid.Name = "propertiesGrid";
-            this.propertiesGrid.ReadOnly = true;
             this.propertiesGrid.RowHeadersVisible = false;
+            this.propertiesGrid.RowTemplate.ReadOnly = true;
+            this.propertiesGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.propertiesGrid.ShowCellErrors = false;
-            this.propertiesGrid.ShowCellToolTips = false;
             this.propertiesGrid.ShowEditingIcon = false;
             this.propertiesGrid.ShowRowErrors = false;
             this.propertiesGrid.Size = new System.Drawing.Size(222, 122);
             this.propertiesGrid.TabIndex = 2;
-            // 
-            // Property
-            // 
-            this.Property.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.Property.HeaderText = "Index";
-            this.Property.MinimumWidth = 21;
-            this.Property.Name = "Property";
-            this.Property.ReadOnly = true;
-            this.Property.Width = 71;
-            // 
-            // Value
-            // 
-            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.Value.HeaderText = "Value";
-            this.Value.MinimumWidth = 100;
-            this.Value.Name = "Value";
-            this.Value.ReadOnly = true;
             // 
             // splitContainer1
             // 
@@ -175,6 +158,22 @@
             this.splitContainer1.Size = new System.Drawing.Size(222, 426);
             this.splitContainer1.SplitterDistance = 300;
             this.splitContainer1.TabIndex = 3;
+            // 
+            // Property
+            // 
+            this.Property.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.Property.HeaderText = "Index";
+            this.Property.MinimumWidth = 21;
+            this.Property.Name = "Property";
+            this.Property.ReadOnly = true;
+            this.Property.Width = 71;
+            // 
+            // Value
+            // 
+            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Value.HeaderText = "Value";
+            this.Value.MinimumWidth = 100;
+            this.Value.Name = "Value";
             // 
             // UIControlsPanel
             // 
@@ -207,8 +206,8 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem highlightToolStripMenuItem;
         internal System.Windows.Forms.DataGridView propertiesGrid;
+        private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Property;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
-        private System.Windows.Forms.SplitContainer splitContainer1;
     }
 }

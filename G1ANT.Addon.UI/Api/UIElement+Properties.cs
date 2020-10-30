@@ -5,6 +5,7 @@ using G1ANT.Addon.UI.Structures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace G1ANT.Addon.UI.Api
 {
@@ -92,7 +93,14 @@ namespace G1ANT.Addon.UI.Api
             var propInstance = GetAutomationPropertyObject(propName);
             if (propInstance == null)
                 return false;
-            return propInstance.GetType().GetProperty("IsSupported")?.GetValue(propInstance) is bool isSupported && isSupported;
+            try
+            {
+                return propInstance.GetType().GetProperty("IsSupported")?.GetValue(propInstance) is bool isSupported && isSupported;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private object GetAutomationPropertyValue(string propName)
@@ -100,19 +108,33 @@ namespace G1ANT.Addon.UI.Api
             var propInstance = GetAutomationPropertyObject(propName);
             if (propInstance == null)
                 return false;
-            var value = propInstance.GetType().GetProperty("Value")?.GetValue(propInstance);
-            if (value is Enum)
-                return value.ToString();
-            return value;
+            try
+            {
+                var value = propInstance.GetType().GetProperty("Value")?.GetValue(propInstance);
+                if (value is Enum)
+                    return value.ToString();
+                return value;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private object GetAutomationPropertyObject(string propName)
         {
-            var propDef = typeof(FrameworkAutomationElementBase.IProperties).GetProperties().Where(x => x.Name == propName).FirstOrDefault();
-            if (propDef == null)
-                return null;
+            try
+            {
+                var propDef = typeof(FrameworkAutomationElementBase.IProperties).GetProperties().Where(x => x.Name == propName).FirstOrDefault();
+                if (propDef == null)
+                    return null;
 
-            return propDef.GetValue(AutomationElement.Properties);
+                return propDef.GetValue(AutomationElement.Properties);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private List<UIPatternWrapper> supportedPatterns;
