@@ -8,6 +8,7 @@ using FlaUI.Core.Definitions;
 using G1ANT.Addon.UI.Api;
 using System.Linq;
 using G1ANT.Addon.UI.Structures;
+using G1ANT.Addon.UI.ExtensionMethods;
 
 namespace G1ANT.Addon.UI.Panels
 {
@@ -102,7 +103,7 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (e.Node.Tag is UIElement element)
                 {
-                    var treeWalker = element.AutomationElement.Automation.TreeWalkerFactory.GetContentViewWalker();
+                    var treeWalker = element.AutomationElement.GetTreeWalker();
                     var elem = treeWalker.GetFirstChild(element.AutomationElement);
                     var i = 0;
                     while (elem != null)
@@ -168,7 +169,7 @@ namespace G1ANT.Addon.UI.Panels
                 return element;
             }
 
-            var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
+            var treeWalker = element.GetTreeWalker();
             var elementParent = treeWalker.GetParent(element);
             return elementParent.Equals(desktop) ? element : GetTopLevelWindow(elementParent);
         }

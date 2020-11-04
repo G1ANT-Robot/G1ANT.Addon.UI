@@ -15,26 +15,14 @@ using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
 using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
 using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
 using FlaUI.Core.Definitions;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace G1ANT.Addon.UI.Api
 {
     public partial class UIElement
     {
-        internal class AutomationNodeDescription
-        {
-            public string id;
-            public string name;
-            public string className;
-            public ControlType type;
-
-            public AutomationNodeDescription(FrameworkAutomationElementBase.IProperties properties)
-            {
-                id = properties.AutomationId.ValueOrDefault;
-                name = properties.Name.ValueOrDefault;
-                className = properties.ClassName.ValueOrDefault;
-                type = properties.ControlType.ValueOrDefault;
-            }
-        }
+        private WPathBuilder wPathBuilder = new WPathBuilder();
         public static UIElement RootElement { get; set; }
 
         public AutomationElement AutomationElement { get; private set; }
@@ -49,7 +37,12 @@ namespace G1ANT.Addon.UI.Api
         public static UIElement FromWPath(WPathStructure wPath)
         {
             return FromWPath(wPath.Value);
-        } 
+        }
+
+        public override bool Equals(Object obj)
+        {
+            return obj is UIElement elem && elem.AutomationElement.Equals(AutomationElement);
+        }
 
         public static UIElement FromWPath(string wPath)
         {
@@ -74,81 +67,15 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        private IEnumerable<AutomationNodeDescription> GetStackNodes(AutomationElement rootElement)
-        {
-            var elementStack = new Stack<AutomationNodeDescription>();
-            var node = AutomationElement;
-            var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-            var walker = automationRoot.Automation.TreeWalkerFactory.GetControlViewWalker();
-
-            do
-            {
-                elementStack.Push(new AutomationNodeDescription(node.Properties));
-
-                var elementParent = walker.GetParent(node);
-
-                if (elementParent.Equals(automationRoot) || elementParent == null)
-                {
-                    break;
-                }
-
-                node = elementParent;
-            }
-            while (true);
-
-            return elementStack;
-        }
-
         private WPathStructure cachedWPath;
         public WPathStructure ToWPath(AutomationElement rootElement = null)
         {
             if (cachedWPath == null)
             {
                 var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-                var nodesDescriptionStack = GetStackNodes(automationRoot);
-                var wPath = ConvertNodesDescriptionToWPath(nodesDescriptionStack);
-                cachedWPath = new WPathStructure(wPath);
+                cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot);
             }
             return cachedWPath;
-        }
-
-        private string ConvertNodesDescriptionToWPath(IEnumerable<AutomationNodeDescription> nodesDescriptionStack)
-        {
-            var isParentEmpty = false;
-            var result = "";
-
-            foreach (var element in nodesDescriptionStack)
-            {
-                if (IsParentEmpty(element))
-                {
-                    isParentEmpty = true;
-                }
-                else
-                {
-                    var xpath = "";
-                    if (isParentEmpty)
-                    {
-                        xpath += "descendant::";
-                    }
-                    if (!string.IsNullOrEmpty(element.id))
-                    {
-                        xpath += $"ui[@id='{element.id}']";
-                    }
-                    else if (!string.IsNullOrEmpty(element.name))
-                    {
-                        xpath += $"ui[@name='{element.name}']";
-                    }
-                    result += $"/{xpath}";
-                    isParentEmpty = false;
-                }
-            }
-
-            return result;
-        }
-
-        private static bool IsParentEmpty(AutomationNodeDescription element)
-        {
-            return string.IsNullOrEmpty(element.id) && string.IsNullOrEmpty(element.name);
         }
 
         public void MouseClick(EventTypes eventType, int? x, int? y)

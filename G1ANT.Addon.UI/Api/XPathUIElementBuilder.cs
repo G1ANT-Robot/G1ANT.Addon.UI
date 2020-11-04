@@ -15,6 +15,7 @@ using FindElementFunc = System.Func<
     System.Func<FlaUI.Core.AutomationElements.AutomationElement, int, bool>,
     FlaUI.Core.AutomationElements.AutomationElement>;
 using NotSupportedException = System.NotSupportedException;
+using G1ANT.Addon.UI.ExtensionMethods;
 
 namespace G1ANT.Addon.UI.Api
 {
@@ -59,7 +60,7 @@ namespace G1ANT.Addon.UI.Api
         private ITreeWalker GetTreeWalker(AutomationElement elem)
         {
             var rootElement = elem ?? Root;
-            return rootElement.Automation.TreeWalkerFactory.GetControlViewWalker();
+            return rootElement.GetTreeWalker();
         }
 
         protected AutomationElement FindChild(AutomationElement elem, CompareFunc compare)

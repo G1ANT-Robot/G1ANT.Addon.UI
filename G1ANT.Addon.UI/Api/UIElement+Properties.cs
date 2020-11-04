@@ -11,15 +11,22 @@ namespace G1ANT.Addon.UI.Api
 {
     public partial class UIElement
     {
-        private const string PropPatterns = "patterns";
-        private const string PropChildren = "children";
+        public class Indexes
+        {
+            public const string Id = "id";
+            public const string Name = "name";
+            public const string Class = "class";
+            public const string Type = "type";
+            public const string Patterns = "patterns";
+            public const string Children = "children";
+        }
 
         private Dictionary<string, string> supportedProperties = new Dictionary<string, string>()
         {
-            { "id", "AutomationId" },
-            { "name", "Name" },
-            { "class", "ClassName" },
-            { "type", "ControlType" },
+            { Indexes.Id, "AutomationId" },
+            { Indexes.Name, "Name" },
+            { Indexes.Class, "ClassName" },
+            { Indexes.Type, "ControlType" },
             { "isenabled", "IsEnabled" },
             { "clickablepoint", "ClickablePoint" },
             { "centerpoint", "CenterPoint" },
@@ -46,17 +53,17 @@ namespace G1ANT.Addon.UI.Api
                             availableProperties.Add(propDef.Key);
                     }
                     if (SupportedPatterns().Count > 0)
-                        availableProperties.Add(PropPatterns);
-                    availableProperties.Add(PropChildren);
+                        availableProperties.Add(Indexes.Patterns);
+                    availableProperties.Add(Indexes.Children);
                 }
                 return availableProperties;
             }
         }
 
-        public object GetPropertyValue(string name)
+        public virtual object GetPropertyValue(string name)
         {
             if (!AvailableProperties.Contains(name.ToLower()))
-                throw new ArgumentException($"Property {name} is not supported by control {ToWPath().Value}");
+                throw new ArgumentException($"Property {name} is not supported by control");
 
             name = name.ToLower();
             if (supportedProperties.ContainsKey(name))
@@ -64,18 +71,18 @@ namespace G1ANT.Addon.UI.Api
 
             switch (name.ToLower())
             {
-                case PropPatterns:
+                case Indexes.Patterns:
                     return SupportedPatterns().ToDictionary(x => x.PatternName, x => (object)x);
-                case PropChildren:
+                case Indexes.Children:
                      return GetChildren().ToList<object>();
             }
             throw new ArgumentException($"Unknown index '{name}'");
         }
 
-        public void SetPropertyValue(string name, object value)
+        public virtual void SetPropertyValue(string name, object value)
         {
             if (!AvailableProperties.Contains(name.ToLower()))
-                throw new ArgumentException($"Property {name} is not supported by control {ToWPath().Value}");
+                throw new ArgumentException($"Property {name} is not supported by control");
 
             throw new ArgumentException($"Index '{name}' is read only");
         }

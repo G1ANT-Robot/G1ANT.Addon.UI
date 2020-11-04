@@ -1,5 +1,7 @@
-﻿using FlaUI.Core.AutomationElements;
+﻿using FlaUI.Core;
+using FlaUI.Core.AutomationElements;
 using FlaUI.UIA3.Patterns;
+using System;
 
 namespace G1ANT.Addon.UI.ExtensionMethods
 {
@@ -20,7 +22,6 @@ namespace G1ANT.Addon.UI.ExtensionMethods
             return element.Properties.Name;
         }
 
-
         public static AutomationElement GetParentElementClosestToDesktopElement(this AutomationElement element)
         {
             var desktop = AutomationSingleton.Automation.GetDesktop();
@@ -31,6 +32,12 @@ namespace G1ANT.Addon.UI.ExtensionMethods
             }
 
             return currentElement;
+        }
+
+        public static ITreeWalker GetTreeWalker(this AutomationElement element)
+        {
+            var rootElement = element ?? throw new ArgumentException();
+            return rootElement.Automation.TreeWalkerFactory.GetControlViewWalker();
         }
 
     }
