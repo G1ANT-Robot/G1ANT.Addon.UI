@@ -11,7 +11,7 @@ namespace G1ANT.Addon.UI.Commands
         public class Arguments : CommandArguments
         {
             [Argument(Required = true, Tooltip = "Desktop application UI element to be focused on")]
-            public WPathStructure WPath { get; set; }
+            public UIComponentStructure WPath { get; set; }
         }
 
         public UISetFocusCommand(AbstractScripter scripter) : base(scripter)
@@ -20,7 +20,7 @@ namespace G1ANT.Addon.UI.Commands
 
         public void Execute(Arguments arguments)
         {
-            UIElement.FromWPath(arguments.WPath).SetFocus();
+            arguments.WPath.Value.SetFocus();
         }
     }
 }

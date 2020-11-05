@@ -36,8 +36,17 @@
             this.controlsTree = new System.Windows.Forms.TreeView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.highlightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.propertiesGrid = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.Property = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.propertiesGrid)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip
@@ -80,16 +89,15 @@
             // 
             // controlsTree
             // 
-            this.controlsTree.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.controlsTree.Location = new System.Drawing.Point(0, 28);
+            this.controlsTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.controlsTree.Location = new System.Drawing.Point(0, 0);
             this.controlsTree.Name = "controlsTree";
             this.controlsTree.ShowNodeToolTips = true;
-            this.controlsTree.Size = new System.Drawing.Size(222, 389);
+            this.controlsTree.Size = new System.Drawing.Size(222, 300);
             this.controlsTree.TabIndex = 1;
             this.controlsTree.AfterCollapse += new System.Windows.Forms.TreeViewEventHandler(this.controlsTree_AfterCollapse);
             this.controlsTree.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.controlsTree_BeforeExpand);
+            this.controlsTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.controlsTree_AfterSelect);
             this.controlsTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.controlsTree_NodeMouseClick);
             this.controlsTree.DoubleClick += new System.EventHandler(this.controlsTree_DoubleClick);
             // 
@@ -103,21 +111,86 @@
             // highlightToolStripMenuItem
             // 
             this.highlightToolStripMenuItem.Name = "highlightToolStripMenuItem";
-            this.highlightToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.highlightToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.highlightToolStripMenuItem.Text = "Highlight";
             this.highlightToolStripMenuItem.Click += new System.EventHandler(this.highlightToolStripMenuItem_Click);
+            // 
+            // propertiesGrid
+            // 
+            this.propertiesGrid.AllowUserToAddRows = false;
+            this.propertiesGrid.AllowUserToDeleteRows = false;
+            this.propertiesGrid.AllowUserToResizeRows = false;
+            this.propertiesGrid.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.propertiesGrid.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            this.propertiesGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.propertiesGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Property,
+            this.Value});
+            this.propertiesGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertiesGrid.Location = new System.Drawing.Point(0, 0);
+            this.propertiesGrid.MultiSelect = false;
+            this.propertiesGrid.Name = "propertiesGrid";
+            this.propertiesGrid.RowHeadersVisible = false;
+            this.propertiesGrid.RowTemplate.ReadOnly = true;
+            this.propertiesGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.propertiesGrid.ShowCellErrors = false;
+            this.propertiesGrid.ShowEditingIcon = false;
+            this.propertiesGrid.ShowRowErrors = false;
+            this.propertiesGrid.Size = new System.Drawing.Size(222, 122);
+            this.propertiesGrid.TabIndex = 2;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Location = new System.Drawing.Point(0, 28);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.controlsTree);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.propertiesGrid);
+            this.splitContainer1.Size = new System.Drawing.Size(222, 426);
+            this.splitContainer1.SplitterDistance = 300;
+            this.splitContainer1.TabIndex = 3;
+            // 
+            // Property
+            // 
+            this.Property.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.Property.HeaderText = "Index";
+            this.Property.MinimumWidth = 21;
+            this.Property.Name = "Property";
+            this.Property.ReadOnly = true;
+            this.Property.Width = 71;
+            // 
+            // Value
+            // 
+            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Value.HeaderText = "Value";
+            this.Value.MinimumWidth = 100;
+            this.Value.Name = "Value";
             // 
             // UIControlsPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.controlsTree);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip);
             this.Name = "UIControlsPanel";
-            this.Size = new System.Drawing.Size(222, 420);
+            this.Size = new System.Drawing.Size(222, 454);
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
             this.contextMenuStrip.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.propertiesGrid)).EndInit();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -132,5 +205,9 @@
         private System.Windows.Forms.ToolStripButton refreshButton;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem highlightToolStripMenuItem;
+        internal System.Windows.Forms.DataGridView propertiesGrid;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Property;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Value;
     }
 }

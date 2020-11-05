@@ -81,7 +81,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\Patterns\IUIPattern.cs" />
+    <Compile Include="Api\Patterns\UILegacyIAccessiblePattern.cs" />
+    <Compile Include="Api\Patterns\UIPatternBase.cs" />
+    <Compile Include="Api\Patterns\UISelectionItemPattern.cs" />
+    <Compile Include="Api\Patterns\UISelectionPattern.cs" />
+    <Compile Include="Api\UIElement+Properties.cs" />
     <Compile Include="Api\UIElement.cs" />
+    <Compile Include="Api\Patterns\UIValuePattern.cs" />
+    <Compile Include="Api\UIPatternWrapper.cs" />
+    <Compile Include="Api\WPathBuilder.cs" />
     <Compile Include="Api\XPathUIElementBuilder.cs" />
     <Compile Include="Commands\UIGetCheckStateCommand.cs" />
     <Compile Include="Commands\UIKeyDownCommand.cs" />
@@ -112,6 +121,8 @@
     <Compile Include="Commands\UIGetTextCommand.cs" />
     <Compile Include="Commands\UISetTextCommand.cs" />
     <Compile Include="Commands\WaitForUICommand.cs" />
+    <Compile Include="Structures\UIComponentStructure.cs" />
+    <Compile Include="Structures\UIPatternStructure.cs" />
     <Compile Include="Structures\WPathStructure.cs" />
     <Compile Include="XPathParser\IXpathBuilder.cs" />
     <Compile Include="XPathParser\XPathAxis.cs" />

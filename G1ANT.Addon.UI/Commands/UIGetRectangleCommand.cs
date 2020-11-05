@@ -12,7 +12,7 @@ namespace G1ANT.Addon.UI.Commands
         public class Arguments : CommandArguments
         {
             [Argument(Required = true, Tooltip = "Desktop application UI element to be located as a bounding box")]
-            public WPathStructure WPath { get; set; }
+            public UIComponentStructure WPath { get; set; }
 
             [Argument(Required = true, Tooltip = "Name of a variable where the command's result will be stored in rectangle structure")]
             public VariableStructure Result { get; set; } = new VariableStructure("result");
@@ -24,7 +24,7 @@ namespace G1ANT.Addon.UI.Commands
 
         public void Execute(Arguments arguments)
         {
-            var element = UIElement.FromWPath(arguments.WPath);
+            var element = arguments.WPath.Value;
             if (element != null)
             {
                 var rect = element.GetRectangle();

@@ -13,7 +13,7 @@ namespace G1ANT.Addon.UI.Commands
         public class Arguments : CommandArguments
         {
             [Argument(Required = true, Tooltip = "Desktop application UI element to be clicked")]
-            public WPathStructure WPath { get; set; }
+            public UIComponentStructure WPath { get; set; }
 
             [Argument(Required = false, Tooltip = "Mouse event type.")]
             public TextStructure EventType { get; set; } = new TextStructure("MouseLeftClick");
@@ -41,7 +41,7 @@ namespace G1ANT.Addon.UI.Commands
                 eventId = (EventTypes)Enum.Parse(typeof(EventTypes), arguments.EventType.Value);
             }
             
-            UIElement.FromWPath(arguments.WPath).MouseClick(eventId, x, y);
+            arguments.WPath.Value.MouseClick(eventId, x, y);
         }
     }
 }
