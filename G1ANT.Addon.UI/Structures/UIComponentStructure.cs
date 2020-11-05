@@ -35,8 +35,6 @@ namespace G1ANT.Addon.UI.Structures
             var val = Value.GetPropertyValue(index);
             if (val is List<object> list)
                 return new ListStructure(list, "", Scripter);
-            //else if (val is IDictionary<string, object> dict)
-            //    return new DictionaryStructure(dict, "", Scripter);
             return Scripter.Structures.CreateStructure(val, "", val?.GetType());
         }
 
