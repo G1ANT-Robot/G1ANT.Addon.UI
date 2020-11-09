@@ -21,7 +21,7 @@ namespace G1ANT.Addon.UI.Structures
 
         public override IList<string> Indexes 
         {
-            get => Value.AvailableProperties;
+            get => Value?.AvailableProperties;
         }
 
         public override Structure Get(string index = "")
@@ -50,7 +50,7 @@ namespace G1ANT.Addon.UI.Structures
 
         public override string ToString(string format)
         {
-            return Value.ToWPath().ToString();
+            return Value?.ToWPath().ToString();
         }
 
         protected override UIElement Parse(string value, string format = null)
