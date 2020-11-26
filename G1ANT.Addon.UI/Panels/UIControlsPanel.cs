@@ -16,6 +16,9 @@ namespace G1ANT.Addon.UI.Panels
     public partial class UIControlsPanel : RobotPanel
     {
         private Form blinkingRectForm;
+        private InspectUIElement inspectUIElement;
+        private bool inspectSingleElementMode = true;
+        private WPathBuilder wpathBuilder = new WPathBuilder();
 
         public UIControlsPanel()
         {
@@ -27,6 +30,10 @@ namespace G1ANT.Addon.UI.Panels
         {
             base.Initialize(mainForm);
             InitRootElement();
+
+            inspectUIElement = new InspectUIElement();
+            inspectUIElement.OnFinished += Inspect_Finished;
+            inspectUIElement.OnElementClicked += Inspect_ElementSelected;
         }
 
         public override void RefreshContent()
@@ -156,7 +163,9 @@ namespace G1ANT.Addon.UI.Panels
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
+            var selectedElement = controlsTree.SelectedNode.Tag as UIElement;
             InitRootElement();
+            SelectUIElement(selectedElement);
         }
 
         #region RectangleForm
@@ -299,5 +308,57 @@ namespace G1ANT.Addon.UI.Panels
                 }
             }
         }
+
+        private void SelectUIElement(UIElement element)
+        {
+            SelectUIElement(element?.AutomationElement);
+        }
+
+        private void SelectUIElement(AutomationElement element)
+        {
+            if (element == null)
+                return;
+
+            var elements = wpathBuilder.GetAutomationElementsPath(element, AutomationSingleton.Automation.GetDesktop());
+            TreeNodeCollection nodes = controlsTree.Nodes;
+            TreeNode foundNode = null;
+
+            foreach (var el in elements)
+            {
+                foundNode = nodes.OfType<TreeNode>().FirstOrDefault(node => node.Tag.Equals(el));
+                if (foundNode == null)
+                {
+                    RobotMessageBox.Show("Cannot find element");
+                    return;
+                }
+                foundNode.Expand();
+                nodes = foundNode.Nodes;
+            }
+            controlsTree.SelectedNode = foundNode;
+        }
+
+        private void inspectSingleButton_Click(object sender, EventArgs e)
+        {
+            inspectSingleElementMode = true;
+            if (MainForm is Form form)
+                form.Hide();
+            inspectUIElement.Start();
+        }
+
+        private void Inspect_Finished()
+        {
+            if (MainForm is Form form)
+                form.Show();
+        }
+
+        private void Inspect_ElementSelected(AutomationElement element, Bitmap bitmap)
+        {
+            if (inspectSingleElementMode)
+            {
+                inspectUIElement.Stop();
+                SelectUIElement(element);
+            }
+        }
+
     }
 }

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UIControlsPanel));
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.insertWPathButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -37,9 +38,10 @@
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.highlightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertiesGrid = new System.Windows.Forms.DataGridView();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.Property = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.inspectSingleButton = new System.Windows.Forms.ToolStripButton();
             this.toolStrip.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.propertiesGrid)).BeginInit();
@@ -53,6 +55,7 @@
             // 
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.insertWPathButton,
+            this.inspectSingleButton,
             this.toolStripSeparator1,
             this.refreshButton});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
@@ -90,6 +93,7 @@
             // controlsTree
             // 
             this.controlsTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.controlsTree.HideSelection = false;
             this.controlsTree.Location = new System.Drawing.Point(0, 0);
             this.controlsTree.Name = "controlsTree";
             this.controlsTree.ShowNodeToolTips = true;
@@ -139,6 +143,22 @@
             this.propertiesGrid.Size = new System.Drawing.Size(222, 122);
             this.propertiesGrid.TabIndex = 2;
             // 
+            // Property
+            // 
+            this.Property.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.Property.HeaderText = "Index";
+            this.Property.MinimumWidth = 21;
+            this.Property.Name = "Property";
+            this.Property.ReadOnly = true;
+            this.Property.Width = 71;
+            // 
+            // Value
+            // 
+            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Value.HeaderText = "Value";
+            this.Value.MinimumWidth = 100;
+            this.Value.Name = "Value";
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -159,21 +179,15 @@
             this.splitContainer1.SplitterDistance = 300;
             this.splitContainer1.TabIndex = 3;
             // 
-            // Property
+            // inspectSingleButton
             // 
-            this.Property.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.Property.HeaderText = "Index";
-            this.Property.MinimumWidth = 21;
-            this.Property.Name = "Property";
-            this.Property.ReadOnly = true;
-            this.Property.Width = 71;
-            // 
-            // Value
-            // 
-            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.Value.HeaderText = "Value";
-            this.Value.MinimumWidth = 100;
-            this.Value.Name = "Value";
+            this.inspectSingleButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.inspectSingleButton.Image = ((System.Drawing.Image)(resources.GetObject("inspectSingleButton.Image")));
+            this.inspectSingleButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.inspectSingleButton.Name = "inspectSingleButton";
+            this.inspectSingleButton.Size = new System.Drawing.Size(23, 22);
+            this.inspectSingleButton.Text = "Inspect single UI element";
+            this.inspectSingleButton.Click += new System.EventHandler(this.inspectSingleButton_Click);
             // 
             // UIControlsPanel
             // 
@@ -209,5 +223,6 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Property;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
+        private System.Windows.Forms.ToolStripButton inspectSingleButton;
     }
 }
