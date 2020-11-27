@@ -9,6 +9,7 @@ using G1ANT.Addon.UI.Api;
 using System.Linq;
 using G1ANT.Addon.UI.Structures;
 using G1ANT.Addon.UI.ExtensionMethods;
+using static G1ANT.Addon.UI.Api.InspectUIElement;
 
 namespace G1ANT.Addon.UI.Panels
 {
@@ -17,7 +18,6 @@ namespace G1ANT.Addon.UI.Panels
     {
         private Form blinkingRectForm;
         private InspectUIElement inspectUIElement;
-        private bool inspectSingleElementMode = true;
         private WPathBuilder wpathBuilder = new WPathBuilder();
 
         public UIControlsPanel()
@@ -339,7 +339,6 @@ namespace G1ANT.Addon.UI.Panels
 
         private void inspectSingleButton_Click(object sender, EventArgs e)
         {
-            inspectSingleElementMode = true;
             if (MainForm is Form form)
                 form.Hide();
             inspectUIElement.Start();
@@ -348,16 +347,17 @@ namespace G1ANT.Addon.UI.Panels
         private void Inspect_Finished()
         {
             if (MainForm is Form form)
+            {
                 form.Show();
+                form.Activate();
+            }
         }
 
-        private void Inspect_ElementSelected(AutomationElement element, Bitmap bitmap)
+        private void Inspect_ElementSelected(InspectSelectedElement element)
         {
-            if (inspectSingleElementMode)
-            {
-                inspectUIElement.Stop();
-                SelectUIElement(element);
-            }
+            inspectUIElement.Stop();
+            InitRootElement();
+            SelectUIElement(element.AutomationElement);
         }
 
     }

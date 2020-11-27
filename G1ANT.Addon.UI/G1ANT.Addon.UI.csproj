@@ -114,6 +114,12 @@
     <Compile Include="Panels\UIControlsPanel.Designer.cs">
       <DependentUpon>UIControlsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Panels\UIInspectMultiplePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panels\UIInspectMultiplePanel.Designer.cs">
+      <DependentUpon>UIInspectMultiplePanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -161,9 +167,13 @@
     <EmbeddedResource Include="Panels\UIControlsPanel.resx">
       <DependentUpon>UIControlsPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Panels\UIInspectMultiplePanel.resx">
+      <DependentUpon>UIInspectMultiplePanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +182,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\inspect1.png" />
+    <Content Include="Resources\inspect2.png" />
+    <Content Include="Resources\trash.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

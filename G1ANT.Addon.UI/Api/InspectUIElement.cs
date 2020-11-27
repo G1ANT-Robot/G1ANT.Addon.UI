@@ -10,6 +10,25 @@ namespace G1ANT.Addon.UI.Api
 {
     public class InspectUIElement : Form
     {
+        public class InspectSelectedElement
+        {
+            public Bitmap Image { get; }
+            public AutomationElement AutomationElement { get; }
+            public string WPath { get; }
+            public string Name { get; }
+
+            private static WPathBuilder wpathBuilder = new WPathBuilder();
+
+            public InspectSelectedElement(AutomationElement element)
+            {
+                AutomationElement = element;
+                Image = FlaUI.Core.Capturing.Capture.Element(element)?.Bitmap;
+                Name = element.Name;
+                WPath = wpathBuilder.GetSimpleWPath(element);
+            }
+        }
+
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool SetWindowPos(IntPtr hWnd, IntPtr hwndAfter, int x, int y, int width, int height, int flags);
@@ -22,14 +41,13 @@ namespace G1ANT.Addon.UI.Api
 
         private IKeyboardMouseEvents mouseHook;
         private AutomationElement highlitedElement;
-        private CaptureImage highlitedElementImage;
 
         public Color BorderColor { get; set; } = Color.Blue;
 
         public delegate void FinishedHandler();
         public event FinishedHandler OnFinished;
 
-        public delegate void ElementSelectedHandler(AutomationElement element, Bitmap bitmap);
+        public delegate void ElementSelectedHandler(InspectSelectedElement element);
         public event ElementSelectedHandler OnElementClicked;
 
         public InspectUIElement()
@@ -92,9 +110,13 @@ namespace G1ANT.Addon.UI.Api
             try
             {
                 var control = AutomationSingleton.Automation.FromPoint(e.Location);
-                HighliteElement(control);
-
-                OnElementClicked?.Invoke(highlitedElement, highlitedElementImage.Bitmap);
+                if (control != null)
+                {
+                    Hide();
+                    var element = new InspectSelectedElement(control);
+                    Show();
+                    OnElementClicked?.Invoke(element);
+                }
             }
             catch
             {
@@ -128,16 +150,15 @@ namespace G1ANT.Addon.UI.Api
                 if (!control.Equals(highlitedElement))
                 {
                     Hide();
-                    highlitedElementImage = FlaUI.Core.Capturing.Capture.Element(control);
+                    highlitedElement = control;
                     InitializeRectangleForm(control.BoundingRectangle);
                 }
             }
             else
             {
                 Hide();
-                highlitedElementImage = null;
+                highlitedElement = null;
             }
-            highlitedElement = control;
         }
 
         private void InitializeRectangleForm(Rectangle rect)

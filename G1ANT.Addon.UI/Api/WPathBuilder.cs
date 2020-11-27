@@ -61,6 +61,14 @@ namespace G1ANT.Addon.UI.Api
             return ConvertNodesDescriptionToWPath(nodesDescriptionStack.Pop(), nodesDescriptionStack);
         }
 
+        public string GetSimpleWPath(AutomationElement element, AutomationElement rootElement = null)
+        {
+            var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
+            var nodesDescriptionStack = GetAutomationElementsPath(element, automationRoot);
+            nodesDescriptionStack.Pop();
+            return NodesToSimpleWPath(nodesDescriptionStack);
+        }
+
         public Stack<UIElement> GetAutomationElementsPath(AutomationElement element, AutomationElement rootElement)
         {
             var elementStack = new Stack<UIElement>();
@@ -90,6 +98,19 @@ namespace G1ANT.Addon.UI.Api
             }
             while (true);
             return elementStack;
+        }
+
+        private string NodesToSimpleWPath(Stack<UIElement> nodesStack)
+        {
+            string wpath = "";
+            var fillPropsSet = SearchByProperties.ToList();
+
+            foreach (var node in nodesStack)
+            {
+                var xpath = CreateXpathPart(node, fillPropsSet);
+                wpath += $"/{xpath}";
+            }
+            return wpath;
         }
 
         private string ConvertNodesDescriptionToWPath(UIElement parent, Stack<UIElement> nodesDescriptionStack)
