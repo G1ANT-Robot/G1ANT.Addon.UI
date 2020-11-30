@@ -8,7 +8,7 @@ using ListBox = System.Windows.Forms.ListBox;
 
 namespace G1ANT.Addon.UI.Panels
 {
-    [Panel(Name = "Inspect multiple controls", DockingSide = DockingSide.Right, InitialAppear = false, Width = 400)]
+    [Panel(Name = "UI Inspector", DockingSide = DockingSide.Right, InitialAppear = false, Width = 400)]
     public partial class UIInspectMultiplePanel : RobotPanel
     {
         private InspectUIElement inspectUIElement;
@@ -57,7 +57,7 @@ namespace G1ANT.Addon.UI.Panels
             e.DrawFocusRectangle();
 
             var rect = e.Bounds;
-            rect.Inflate(-2, -2);
+            rect.Inflate(-3, -3);
 
             var dy = (rect.Height - item.Image.Height) / 2;
             if (dy > 0)
