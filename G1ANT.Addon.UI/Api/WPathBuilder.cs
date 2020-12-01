@@ -1,4 +1,5 @@
 ﻿using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Exceptions;
 using G1ANT.Addon.UI.Structures;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,11 +57,19 @@ namespace G1ANT.Addon.UI.Api
         public string GetWPath(AutomationElement element, AutomationElement rootElement = null)
         {
             var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-            var nodesDescriptionStack = GetStackNodes(element, automationRoot);
+            var nodesDescriptionStack = GetAutomationElementsPath(element, automationRoot);
             return ConvertNodesDescriptionToWPath(nodesDescriptionStack.Pop(), nodesDescriptionStack);
         }
 
-        private Stack<UIElement> GetStackNodes(AutomationElement element, AutomationElement rootElement)
+        public string GetSimpleWPath(AutomationElement element, AutomationElement rootElement = null)
+        {
+            var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
+            var nodesDescriptionStack = GetAutomationElementsPath(element, automationRoot);
+            nodesDescriptionStack.Pop();
+            return NodesToSimpleWPath(nodesDescriptionStack);
+        }
+
+        public Stack<UIElement> GetAutomationElementsPath(AutomationElement element, AutomationElement rootElement)
         {
             var elementStack = new Stack<UIElement>();
             var node = element;
@@ -69,6 +78,15 @@ namespace G1ANT.Addon.UI.Api
 
             do
             {
+                try
+                {
+                    // is element still alive?
+                    var isSupported = node.Properties.Name.IsSupported;
+                }
+                catch 
+                {
+                    break;
+                }
                 elementStack.Push(new UIElementCachedProperties(node));
                 var elementParent = walker.GetParent(node);
                 if (elementParent == null)
@@ -80,6 +98,19 @@ namespace G1ANT.Addon.UI.Api
             }
             while (true);
             return elementStack;
+        }
+
+        private string NodesToSimpleWPath(Stack<UIElement> nodesStack)
+        {
+            string wpath = "";
+            var fillPropsSet = SearchByProperties.ToList();
+
+            foreach (var node in nodesStack)
+            {
+                var xpath = CreateXpathPart(node, fillPropsSet);
+                wpath += $"/{xpath}";
+            }
+            return wpath;
         }
 
         private string ConvertNodesDescriptionToWPath(UIElement parent, Stack<UIElement> nodesDescriptionStack)
