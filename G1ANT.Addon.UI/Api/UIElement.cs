@@ -23,11 +23,38 @@ namespace G1ANT.Addon.UI.Api
     public partial class UIElement
     {
         private WPathBuilder wPathBuilder = new WPathBuilder();
+        private WPathStructure cachedWPath;
+
         public static UIElement RootElement { get; set; }
 
-        public AutomationElement AutomationElement { get; private set; }
+        private AutomationElement automationElement = null;
+        public AutomationElement AutomationElement 
+        { 
+            get
+            {
+                if (automationElement == null)
+                {
+                    if (cachedWPath == null)
+                        throw new NullReferenceException("AutomationElement has not been initialized");
+                    var element = AutomationElementFromWPath(cachedWPath?.Value);
+                    if (element == null)
+                        throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
+                    automationElement = element;
+                }
+                return automationElement;
+            }
+            private set
+            {
+                automationElement = value;
+            }
+        }
 
         private UIElement() { }
+
+        public UIElement(string wPath)
+        {
+            cachedWPath = new WPathStructure(wPath);
+        }
 
         public UIElement(AutomationElement element)
         {
@@ -44,10 +71,16 @@ namespace G1ANT.Addon.UI.Api
             return obj is UIElement elem && elem.AutomationElement.Equals(AutomationElement);
         }
 
-        public static UIElement FromWPath(string wPath)
+        public static AutomationElement AutomationElementFromWPath(string wPath)
         {
             var xe = new XPathParser<object>().Parse(wPath, new XPathUIElementBuilder(RootElement?.AutomationElement));
-            if (xe is AutomationElement element)
+            return xe as AutomationElement;
+        }
+
+        public static UIElement FromWPath(string wPath)
+        {
+            var element = AutomationElementFromWPath(wPath);
+            if (element != null)
             {
                 return new UIElement() { AutomationElement = element };
             }
@@ -67,7 +100,6 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        private WPathStructure cachedWPath;
         public WPathStructure ToWPath(AutomationElement rootElement = null)
         {
             if (cachedWPath == null)
