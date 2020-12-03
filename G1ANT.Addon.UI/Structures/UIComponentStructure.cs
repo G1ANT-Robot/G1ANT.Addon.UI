@@ -55,10 +55,7 @@ namespace G1ANT.Addon.UI.Structures
 
         protected override UIElement Parse(string value, string format = null)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException($"Cannot create {Attributes.Name} from empty string");
-
-            return UIElement.FromWPath(value) ?? throw new ParseStructureException($"Control '{value}' does not exist");
+            return new UIElement(value);
         }
 
     }
