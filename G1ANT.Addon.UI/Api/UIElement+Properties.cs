@@ -84,6 +84,12 @@ namespace G1ANT.Addon.UI.Api
             if (!AvailableProperties.Contains(name.ToLower()))
                 throw new ArgumentException($"Property {name} is not supported by control");
 
+            switch (name.ToLower())
+            {
+                case Indexes.Patterns:
+                    // do nothing, it is for multi-indexes case when try to asign to pattern's index
+                    return;
+            }
             throw new ArgumentException($"Index '{name}' is read only");
         }
 
