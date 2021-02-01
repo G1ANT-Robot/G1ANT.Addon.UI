@@ -6,6 +6,10 @@ using System.Drawing;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using G1ANT.Addon.UI.Api;
+using System.Linq;
+using G1ANT.Addon.UI.Structures;
+using G1ANT.Addon.UI.ExtensionMethods;
+using static G1ANT.Addon.UI.Api.InspectUIElement;
 
 namespace G1ANT.Addon.UI.Panels
 {
@@ -13,6 +17,8 @@ namespace G1ANT.Addon.UI.Panels
     public partial class UIControlsPanel : RobotPanel
     {
         private Form blinkingRectForm;
+        private InspectUIElement inspectUIElement;
+        private WPathBuilder wpathBuilder = new WPathBuilder();
 
         public UIControlsPanel()
         {
@@ -24,6 +30,10 @@ namespace G1ANT.Addon.UI.Panels
         {
             base.Initialize(mainForm);
             InitRootElement();
+
+            inspectUIElement = new InspectUIElement();
+            inspectUIElement.OnFinished += Inspect_Finished;
+            inspectUIElement.OnElementClicked += Inspect_ElementSelected;
         }
 
         public override void RefreshContent()
@@ -36,7 +46,7 @@ namespace G1ANT.Addon.UI.Panels
 
             var root = AutomationSingleton.Automation.GetDesktop();
             var rootNode = controlsTree.Nodes.Add(root.FrameworkAutomationElement.Name);
-            rootNode.Tag = root;
+            rootNode.Tag = new UIElement(root);
             rootNode.Nodes.Add("");
             rootNode.Expand();
         }
@@ -98,10 +108,10 @@ namespace G1ANT.Addon.UI.Panels
             e.Node.Nodes.Clear();
             try
             {
-                if (e.Node.Tag is AutomationElement element)
+                if (e.Node.Tag is UIElement element)
                 {
-                    var treeWalker = element.Automation.TreeWalkerFactory.GetContentViewWalker();
-                    var elem = treeWalker.GetFirstChild(element);
+                    var treeWalker = element.AutomationElement.GetTreeWalker();
+                    var elem = treeWalker.GetFirstChild(element.AutomationElement);
                     var i = 0;
                     while (elem != null)
                     {
@@ -109,7 +119,7 @@ namespace G1ANT.Addon.UI.Panels
                         {
                             var node = e.Node.Nodes.Add(GetTreeNodeName(elem));
                             node.ToolTipText = GetTreeNodeTooltip(elem, i++);
-                            node.Tag = elem;
+                            node.Tag = new UIElement(elem);
                             node.Nodes.Add("");
 
                             elem = treeWalker.GetNextSibling(elem);
@@ -131,9 +141,8 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (controlsTree.SelectedNode != null)
                 {
-                    if (controlsTree.SelectedNode.Tag is AutomationElement automationElement)
+                    if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        var uiElement = new UIElement(automationElement);
                         MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiElement.ToWPath()}{SpecialChars.Text}");
                     }
                 }
@@ -154,7 +163,9 @@ namespace G1ANT.Addon.UI.Panels
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
+            var selectedElement = controlsTree.SelectedNode.Tag as UIElement;
             InitRootElement();
+            SelectUIElement(selectedElement);
         }
 
         #region RectangleForm
@@ -167,7 +178,7 @@ namespace G1ANT.Addon.UI.Panels
                 return element;
             }
 
-            var treeWalker = element.Automation.TreeWalkerFactory.GetControlViewWalker();
+            var treeWalker = element.GetTreeWalker();
             var elementParent = treeWalker.GetParent(element);
             return elementParent.Equals(desktop) ? element : GetTopLevelWindow(elementParent);
         }
@@ -178,13 +189,12 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (controlsTree.SelectedNode != null)
                 {
-                    if (controlsTree.SelectedNode.Tag is AutomationElement automationElement)
+                    if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        UIElement uiELement = new UIElement(automationElement);
-                        var element = UIElement.FromWPath(uiELement.ToWPath());
+                        var element = UIElement.FromWPath(uiElement.ToWPath());
                         if (element != null)
                         {
-                            var window = GetTopLevelWindow(automationElement);
+                            var window = GetTopLevelWindow(uiElement.AutomationElement);
                             if (window != null)
                             {
                                 var iHandle = window.FrameworkAutomationElement.NativeWindowHandle;
@@ -266,5 +276,89 @@ namespace G1ANT.Addon.UI.Panels
                 contextMenuStrip.Show(Control.MousePosition);
             }
         }
+
+        private void controlsTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            var selectedNode = controlsTree.SelectedNode;
+            var selectedModel = selectedNode?.Tag;
+
+            propertiesGrid.Rows.Clear();
+
+            if (selectedModel is UIElement uiElement)
+            {
+                var uiComponent = new UIComponentStructure(uiElement, "", scripter);
+
+                var properties = uiComponent.Indexes;
+                if (properties?.Any() == true)
+                {
+                    propertiesGrid.Rows.AddRange(
+                        properties
+                            .Select(p => new System.Windows.Forms.DataGridViewRow()
+                            {
+                                Cells = {
+                                    new DataGridViewTextBoxCell() { Value = p },
+                                    new DataGridViewTextBoxCell() { 
+                                        Value = uiComponent.Get(p).ToString(), 
+                                        ToolTipText = uiComponent.Get(p).ToString() 
+                                    },
+                                },
+                            })
+                            .ToArray()
+                    );
+                }
+            }
+        }
+
+        private void SelectUIElement(UIElement element)
+        {
+            SelectUIElement(element?.AutomationElement);
+        }
+
+        private void SelectUIElement(AutomationElement element)
+        {
+            if (element == null)
+                return;
+
+            var elements = wpathBuilder.GetAutomationElementsPath(element, AutomationSingleton.Automation.GetDesktop());
+            TreeNodeCollection nodes = controlsTree.Nodes;
+            TreeNode foundNode = null;
+
+            foreach (var el in elements)
+            {
+                foundNode = nodes.OfType<TreeNode>().FirstOrDefault(node => node.Tag.Equals(el));
+                if (foundNode == null)
+                {
+                    RobotMessageBox.Show("Cannot find element");
+                    return;
+                }
+                foundNode.Expand();
+                nodes = foundNode.Nodes;
+            }
+            controlsTree.SelectedNode = foundNode;
+        }
+
+        private void inspectSingleButton_Click(object sender, EventArgs e)
+        {
+            if (MainForm is Form form)
+                form.Hide();
+            inspectUIElement.Start();
+        }
+
+        private void Inspect_Finished()
+        {
+            if (MainForm is Form form)
+            {
+                form.Show();
+                form.Activate();
+            }
+        }
+
+        private void Inspect_ElementSelected(InspectSelectedElement element)
+        {
+            inspectUIElement.Stop();
+            InitRootElement();
+            SelectUIElement(element.AutomationElement);
+        }
+
     }
 }
