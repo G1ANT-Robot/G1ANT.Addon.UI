@@ -10,6 +10,7 @@ using System.Linq;
 using G1ANT.Addon.UI.Structures;
 using G1ANT.Addon.UI.ExtensionMethods;
 using static G1ANT.Addon.UI.Api.InspectUIElement;
+using System.Collections.Generic;
 
 namespace G1ANT.Addon.UI.Panels
 {
@@ -121,12 +122,19 @@ namespace G1ANT.Addon.UI.Panels
                             node.ToolTipText = GetTreeNodeTooltip(elem, i++);
                             node.Tag = new UIElement(elem);
                             node.Nodes.Add("");
-
-                            elem = treeWalker.GetNextSibling(elem);
                         }
                         catch (Exception ex)
                         {
                             scripter?.Logger?.Warn($"Cannot display Window Tree item", ex);
+                        }
+
+                        try
+                        {
+                            elem = treeWalker.GetNextSibling(elem);
+                        }
+                        catch
+                        {
+                            elem = null;
                         }
                     }
                 }
@@ -163,7 +171,7 @@ namespace G1ANT.Addon.UI.Panels
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
-            var selectedElement = controlsTree.SelectedNode.Tag as UIElement;
+            var selectedElement = controlsTree.SelectedNode?.Tag as UIElement;
             InitRootElement();
             SelectUIElement(selectedElement);
         }
@@ -277,6 +285,11 @@ namespace G1ANT.Addon.UI.Panels
             }
         }
 
+        private IList<string> GetComponentIndexes(UIComponentStructure component)
+        {
+            return component.Indexes.Where(x => x != UIElement.Indexes.Children).ToList();
+        }
+
         private void controlsTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var selectedNode = controlsTree.SelectedNode;
@@ -288,7 +301,7 @@ namespace G1ANT.Addon.UI.Panels
             {
                 var uiComponent = new UIComponentStructure(uiElement, "", scripter);
 
-                var properties = uiComponent.Indexes;
+                var properties = GetComponentIndexes(uiComponent);
                 if (properties?.Any() == true)
                 {
                     propertiesGrid.Rows.AddRange(

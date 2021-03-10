@@ -104,8 +104,15 @@ namespace G1ANT.Addon.UI.Api
         {
             if (cachedWPath == null)
             {
-                var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-                cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot);
+                try
+                {
+                    var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
+                    cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot);
+                }
+                catch
+                {
+                    return new WPathStructure("");
+                }
             }
             return cachedWPath;
         }

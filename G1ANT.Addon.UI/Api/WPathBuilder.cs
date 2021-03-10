@@ -51,7 +51,7 @@ namespace G1ANT.Addon.UI.Api
 
         public WPathStructure GetWPathStructure(AutomationElement element, AutomationElement rootElement = null)
         {
-            return new WPathStructure(GetWPath(element, rootElement));
+            return new WPathStructure(GetSimpleWPath(element, rootElement));
         }
 
         public string GetWPath(AutomationElement element, AutomationElement rootElement = null)
