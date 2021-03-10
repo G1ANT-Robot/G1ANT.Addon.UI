@@ -37,7 +37,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
         public static ITreeWalker GetTreeWalker(this AutomationElement element)
         {
             var rootElement = element ?? throw new ArgumentException();
-            return rootElement.Automation.TreeWalkerFactory.GetControlViewWalker();
+            return rootElement.Automation.TreeWalkerFactory.GetRawViewWalker();
         }
 
     }
