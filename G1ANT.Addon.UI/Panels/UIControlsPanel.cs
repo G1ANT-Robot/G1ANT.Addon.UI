@@ -287,7 +287,6 @@ namespace G1ANT.Addon.UI.Panels
 
         private IList<string> GetComponentIndexes(UIComponentStructure component)
         {
-            // exclude childrens
             return component.Indexes.Where(x => x != UIElement.Indexes.Children).ToList();
         }
 
