@@ -1,6 +1,7 @@
 ﻿using FlaUI.Core;
 using G1ANT.Addon.UI.Api;
 using G1ANT.Addon.UI.Api.Patterns;
+using G1ANT.Addon.UI.ExtensionMethods;
 using G1ANT.Addon.UI.Structures;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace G1ANT.Addon.UI.Api
             public const string Type = "type";
             public const string Patterns = "patterns";
             public const string Children = "children";
+            public const string Index = "index";
         }
 
         private Dictionary<string, string> supportedProperties = new Dictionary<string, string>()
@@ -55,14 +57,20 @@ namespace G1ANT.Addon.UI.Api
                     if (SupportedPatterns().Count > 0)
                         availableProperties.Add(Indexes.Patterns);
                     availableProperties.Add(Indexes.Children);
+                    availableProperties.Add(Indexes.Index);
                 }
                 return availableProperties;
             }
         }
 
+        public bool IsPropertySupported(string name)
+        {
+            return AvailableProperties.Contains(name.ToLower());
+        }
+
         public virtual object GetPropertyValue(string name)
         {
-            if (!AvailableProperties.Contains(name.ToLower()))
+            if (!IsPropertySupported(name))
                 throw new ArgumentException($"Property {name} is not supported by control");
 
             name = name.ToLower();
@@ -75,13 +83,15 @@ namespace G1ANT.Addon.UI.Api
                     return SupportedPatterns().ToDictionary(x => x.PatternName, x => (object)x);
                 case Indexes.Children:
                      return GetChildren().ToList<object>();
+                case Indexes.Index:
+                    return Index;
             }
             throw new ArgumentException($"Unknown index '{name}'");
         }
 
         public virtual void SetPropertyValue(string name, object value)
         {
-            if (!AvailableProperties.Contains(name.ToLower()))
+            if (!IsPropertySupported(name))
                 throw new ArgumentException($"Property {name} is not supported by control");
 
             switch (name.ToLower())
@@ -97,7 +107,8 @@ namespace G1ANT.Addon.UI.Api
         private IList<UIElement> GetChildren()
         {
             if (cachedChildren == null)
-                cachedChildren = AutomationElement.FindAllChildren().Select(x => new UIElement(x)).ToList();
+                cachedChildren = AutomationElement.FindAllChildren().Select(
+                    (elem, index) => elem.ToUIElement(index)).ToList();
             return cachedChildren;
         }
 

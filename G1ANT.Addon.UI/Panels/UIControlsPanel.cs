@@ -47,7 +47,7 @@ namespace G1ANT.Addon.UI.Panels
 
             var root = AutomationSingleton.Automation.GetDesktop();
             var rootNode = controlsTree.Nodes.Add(root.FrameworkAutomationElement.Name);
-            rootNode.Tag = new UIElement(root);
+            rootNode.Tag = new UIElement(root, 0);
             rootNode.Nodes.Add("");
             rootNode.Expand();
         }
@@ -80,27 +80,27 @@ namespace G1ANT.Addon.UI.Panels
             return $"{GetControlTypeString(element)}{id} \"{element.Properties.Name.ValueOrDefault}\"";
         }
 
-        private string GetTreeNodeTooltip(AutomationElement element, int index)
+        private string GetTreeNodeTooltip(UIElement element)
         {
             if (element == null)
                 return null;
             var result = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(element.Properties.AutomationId.ValueOrDefault))
-                result.AppendLine($"id: {element.Properties.AutomationId.ValueOrDefault}");
+            if (element.IsPropertySupported(UIElement.Indexes.Id))
+                result.AppendLine($"id: {element.GetPropertyValue(UIElement.Indexes.Id)}");
 
-            result.AppendLine($"type: {GetControlTypeString(element)}");
+            result.AppendLine($"type: {GetControlTypeString(element.AutomationElement)}");
             try
             {
-                result.AppendLine($"typeid: {(int)element.ControlType}");
+                result.AppendLine($"typeid: {(int)element.AutomationElement.ControlType}");
             }
             catch { }
 
-            if (!string.IsNullOrWhiteSpace(element.Properties.ClassName.ValueOrDefault))
-                result.AppendLine($"class: {element.ClassName}");
-            if (!string.IsNullOrWhiteSpace(element.Properties.Name.ValueOrDefault))
-                result.AppendLine($"name: {element.Name}");
-            result.AppendLine($"control index: {index}");
+            if (element.IsPropertySupported(UIElement.Indexes.Class))
+                result.AppendLine($"class: {element.GetPropertyValue(UIElement.Indexes.Class)}");
+            if (element.IsPropertySupported(UIElement.Indexes.Name))
+                result.AppendLine($"name: {element.GetPropertyValue(UIElement.Indexes.Name)}");
+            result.AppendLine($"control index: {element.Index}");
             return result.ToString();
         }
 
@@ -113,14 +113,15 @@ namespace G1ANT.Addon.UI.Panels
                 {
                     var treeWalker = element.AutomationElement.GetTreeWalker();
                     var elem = treeWalker.GetFirstChild(element.AutomationElement);
-                    var i = 0;
+                    var index = 0;
                     while (elem != null)
                     {
                         try
                         {
+                            var uiElement = elem.ToUIElement(index++);
                             var node = e.Node.Nodes.Add(GetTreeNodeName(elem));
-                            node.ToolTipText = GetTreeNodeTooltip(elem, i++);
-                            node.Tag = new UIElement(elem);
+                            node.Tag = uiElement;
+                            node.ToolTipText = GetTreeNodeTooltip(uiElement);
                             node.Nodes.Add("");
                         }
                         catch (Exception ex)
@@ -332,7 +333,7 @@ namespace G1ANT.Addon.UI.Panels
             if (element == null)
                 return;
 
-            var elements = wpathBuilder.GetAutomationElementsPath(element, AutomationSingleton.Automation.GetDesktop());
+            var elements = wpathBuilder.BuildUIElementsStack(element, AutomationSingleton.Automation.GetDesktop());
             TreeNodeCollection nodes = controlsTree.Nodes;
             TreeNode foundNode = null;
 

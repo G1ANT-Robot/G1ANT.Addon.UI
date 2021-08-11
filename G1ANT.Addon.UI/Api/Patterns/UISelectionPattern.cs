@@ -1,4 +1,5 @@
 ﻿using FlaUI.Core.AutomationElements;
+using G1ANT.Addon.UI.ExtensionMethods;
 using System;
 using System.Linq;
 
@@ -29,7 +30,7 @@ namespace G1ANT.Addon.UI.Api.Patterns
                 case PropIsSelectionRequired:
                     return pattern.IsSelectionRequired.Value;
                 case PropSelection:
-                    return pattern.Selection.Value.Select(x => new UIElement(x)).ToList<object>();
+                    return pattern.Selection.Value.Select((elem, index) => elem.ToUIElement(index)).ToList<object>();
             }
             throw new ArgumentException($"Unknown index '{name}'");
         }

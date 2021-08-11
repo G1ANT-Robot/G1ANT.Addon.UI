@@ -36,10 +36,9 @@ namespace G1ANT.Addon.UI.Api
                 {
                     if (cachedWPath == null)
                         throw new NullReferenceException("AutomationElement has not been initialized");
-                    var element = AutomationElementFromWPath(cachedWPath?.Value);
-                    if (element == null)
-                        throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
-                    automationElement = element;
+                    var element = FromWPath(cachedWPath?.Value);
+                    automationElement = element.AutomationElement;
+                    Index = element.Index;
                 }
                 return automationElement;
             }
@@ -49,6 +48,8 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
+        public int Index { get; private set; }
+
         private UIElement() { }
 
         public UIElement(string wPath)
@@ -56,9 +57,10 @@ namespace G1ANT.Addon.UI.Api
             cachedWPath = new WPathStructure(wPath);
         }
 
-        public UIElement(AutomationElement element)
+        public UIElement(AutomationElement element, int index)
         {
             AutomationElement = element ?? throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
+            Index = index;
         }
 
         public static UIElement FromWPath(WPathStructure wPath)
@@ -71,18 +73,12 @@ namespace G1ANT.Addon.UI.Api
             return obj is UIElement elem && elem.AutomationElement.Equals(AutomationElement);
         }
 
-        public static AutomationElement AutomationElementFromWPath(string wPath)
-        {
-            var xe = new XPathParser<object>().Parse(wPath, new XPathUIElementBuilder(RootElement?.AutomationElement));
-            return xe as AutomationElement;
-        }
-
         public static UIElement FromWPath(string wPath)
         {
-            var element = AutomationElementFromWPath(wPath);
-            if (element != null)
+            var element = new XPathParser<object>().Parse(wPath, new XPathUIElementBuilder(RootElement?.AutomationElement));
+            if (element is UIElement uiElement)
             {
-                return new UIElement() { AutomationElement = element };
+                return uiElement;
             }
             throw new NullReferenceException($"Cannot find UI element described by \"{wPath}\".");
         }
