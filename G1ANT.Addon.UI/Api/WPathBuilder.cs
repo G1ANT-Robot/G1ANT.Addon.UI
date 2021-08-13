@@ -38,19 +38,15 @@ namespace G1ANT.Addon.UI.Api
         }
 
         private const string DescendantPrefix = "/descendant::";
-        public static string[] SearchByProperties
+        public static Dictionary<string, bool> SearchByProperties = new Dictionary<string, bool>()
         {
-            get
-            {
-                return new string[] {
-                    UIElement.Indexes.Id,
-                    UIElement.Indexes.Class,
-                    UIElement.Indexes.Name,
-                    UIElement.Indexes.Type 
-                };
-            }
-        }
-        private static List<List<string>> SearchByPropertiesCombinations = GetPossibleCombinations(SearchByProperties);
+            { UIElement.Indexes.Id, true },
+            { UIElement.Indexes.Class, true },
+            { UIElement.Indexes.Name, true },
+            { UIElement.Indexes.Type, true },
+            { UIElement.Indexes.Index, false }
+        };
+        private string[] GetSearchByProperties() => SearchByProperties.Where(x => x.Value).Select(x => x.Key).ToArray();
 
         public WPathBuilder()
         {
@@ -83,11 +79,12 @@ namespace G1ANT.Addon.UI.Api
             var elementList = new List<UIElement>();
             AutomationElement parent = null;
 
-            foreach (var elem in stack)
+            foreach (var item in stack)
             {
-                var index = FindElementIndexInParent(parent, elem);
-                var uiElement = new UIElementCachedProperties(elem, index);
+                var index = FindElementIndexInParent(parent, item);
+                var uiElement = new UIElementCachedProperties(item, index);
                 elementList.Add(uiElement);
+                parent = item;
             }
             elementList.Reverse();
             return new Stack<UIElement>(elementList);
@@ -145,11 +142,11 @@ namespace G1ANT.Addon.UI.Api
         private string NodesToSimpleWPath(Stack<UIElement> nodesStack, List<string> properties = null)
         {
             string wpath = "";
-            var fillPropsSet = properties ?? SearchByProperties.ToList();
+            var fillPropsSet = properties ?? GetSearchByProperties().ToList();
 
             foreach (var node in nodesStack)
             {
-                var xpath = CreateXpathPart(node, fillPropsSet);
+                var xpath = BuildXpathPart(node, fillPropsSet);
                 wpath += $"/{xpath}";
             }
             return wpath;
@@ -173,11 +170,11 @@ namespace G1ANT.Addon.UI.Api
                 return DescendantPrefix + xpath.Remove(0, 1);
             }
 
-            foreach (var searchByProps in SearchByPropertiesCombinations)
+            foreach (var searchByProps in GetPossibleCombinations(GetSearchByProperties()))
             {
                 if (HasUniqueProperties(searchByProps, currentElement, children))
                 {
-                    var xpath = CreateXpathPart(currentElement, searchByProps);
+                    var xpath = BuildXpathPart(currentElement, searchByProps);
                     return $"/{xpath}" + ConvertNodesDescriptionToWPath(currentElement, nodesDescriptionStack);
                 }
             }
@@ -203,21 +200,31 @@ namespace G1ANT.Addon.UI.Api
             return true;
         }
 
-        private string GetFilter(UIElement element, List<string> propNames)
+        private string BuildFilterCondition(UIElement element, List<string> propNames)
         {
             List<string> filters = new List<string>();
             foreach (var propName in propNames)
             {
                 var val = element.GetPropertyValue(propName);
                 if (val != null)
-                    filters.Add($"@{propName}='{val}'");
+                {
+                    filters.Add(BuildFilterPart(propName, val));
+                }
             }
             return string.Join(" and ", filters);
         }
 
-        private string CreateXpathPart(UIElement element, List<string> properties)
+        private string BuildFilterPart(string name, object value)
         {
-            var filter = GetFilter(element, properties);
+            if (value.IsNumber())
+                return $"@{name}={value}";
+            else
+                return $"@{name}='{value}'";
+        }
+
+        private string BuildXpathPart(UIElement element, List<string> properties)
+        {
+            var filter = BuildFilterCondition(element, properties);
             return $"ui[{filter}]";
         }
 

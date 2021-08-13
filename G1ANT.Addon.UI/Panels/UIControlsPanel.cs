@@ -88,14 +88,10 @@ namespace G1ANT.Addon.UI.Panels
 
             if (element.IsPropertySupported(UIElement.Indexes.Id))
                 result.AppendLine($"id: {element.GetPropertyValue(UIElement.Indexes.Id)}");
-
-            result.AppendLine($"type: {GetControlTypeString(element.AutomationElement)}");
-            try
-            {
-                result.AppendLine($"typeid: {(int)element.AutomationElement.ControlType}");
-            }
-            catch { }
-
+            if (element.IsPropertySupported(UIElement.Indexes.Type))
+                result.AppendLine($"type: {element.GetPropertyValue(UIElement.Indexes.Type)}");
+            if (element.IsPropertySupported(UIElement.Indexes.TypeId))
+                result.AppendLine($"typeid: {element.GetPropertyValue(UIElement.Indexes.TypeId)}");
             if (element.IsPropertySupported(UIElement.Indexes.Class))
                 result.AppendLine($"class: {element.GetPropertyValue(UIElement.Indexes.Class)}");
             if (element.IsPropertySupported(UIElement.Indexes.Name))
@@ -152,7 +148,7 @@ namespace G1ANT.Addon.UI.Panels
                 {
                     if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiElement.ToWPath()}{SpecialChars.Text}");
+                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiElement.ToWPath(rebuild: true)}{SpecialChars.Text}");
                     }
                 }
             }
@@ -200,7 +196,7 @@ namespace G1ANT.Addon.UI.Panels
                 {
                     if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        var element = UIElement.FromWPath(uiElement.ToWPath());
+                        var element = UIElement.FromWPath(uiElement.ToWPath(rebuild: true));
                         if (element != null)
                         {
                             var window = GetTopLevelWindow(uiElement.AutomationElement);
@@ -373,6 +369,5 @@ namespace G1ANT.Addon.UI.Panels
             InitRootElement();
             SelectUIElement(element.AutomationElement);
         }
-
     }
 }

@@ -96,9 +96,9 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        public WPathStructure ToWPath(AutomationElement rootElement = null)
+        public WPathStructure ToWPath(AutomationElement rootElement = null, bool rebuild = false)
         {
-            if (cachedWPath == null)
+            if (cachedWPath == null || rebuild)
             {
                 try
                 {

@@ -21,6 +21,7 @@ namespace G1ANT.Addon.UI.Api
             public const string Patterns = "patterns";
             public const string Children = "children";
             public const string Index = "index";
+            public const string TypeId = "typeid";
         }
 
         private Dictionary<string, string> supportedProperties = new Dictionary<string, string>()
@@ -49,15 +50,22 @@ namespace G1ANT.Addon.UI.Api
                 if (availableProperties == null)
                 {
                     availableProperties = new List<string>();
+                    availableProperties.Add(Indexes.Index);
                     foreach (var propDef in supportedProperties)
                     {
                         if (IsAutomationPropertySupported(propDef.Value))
                             availableProperties.Add(propDef.Key);
                     }
+                    try
+                    {
+                        var controlType = AutomationElement.ControlType;
+                        availableProperties.Add(Indexes.TypeId);
+                    }
+                    catch { }
                     if (SupportedPatterns().Count > 0)
                         availableProperties.Add(Indexes.Patterns);
                     availableProperties.Add(Indexes.Children);
-                    availableProperties.Add(Indexes.Index);
+
                 }
                 return availableProperties;
             }
@@ -85,6 +93,8 @@ namespace G1ANT.Addon.UI.Api
                      return GetChildren().ToList<object>();
                 case Indexes.Index:
                     return Index;
+                case Indexes.TypeId:
+                    return (int)AutomationElement.ControlType;
             }
             throw new ArgumentException($"Unknown index '{name}'");
         }

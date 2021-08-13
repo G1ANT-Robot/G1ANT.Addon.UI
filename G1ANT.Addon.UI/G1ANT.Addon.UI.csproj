@@ -97,6 +97,12 @@
     <Compile Include="Api\Patterns\UIValuePattern.cs" />
     <Compile Include="Api\UIPatternWrapper.cs" />
     <Compile Include="Api\WPathBuilder.cs" />
+    <Compile Include="Api\WPathPropertiesSelectorButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Api\WPathPropertiesSelectorButton.Designer.cs">
+      <DependentUpon>WPathPropertiesSelectorButton.cs</DependentUpon>
+    </Compile>
     <Compile Include="Api\XPathUIElementBuilder.cs" />
     <Compile Include="Commands\UIGetCheckStateCommand.cs" />
     <Compile Include="Commands\UIKeyDownCommand.cs" />
@@ -106,6 +112,7 @@
     <Compile Include="Enums\EventTypes.cs" />
     <Compile Include="ExtensionMethods\AutomationExtensions.cs" />
     <Compile Include="AutomationSingleton.cs" />
+    <Compile Include="ExtensionMethods\ObjectExtensions.cs" />
     <Compile Include="Helpers\VirtualKeyShortConverter.cs" />
     <Compile Include="MainAddon.cs" />
     <Compile Include="Panels\UIControlsPanel.cs">
@@ -184,6 +191,8 @@
     <None Include="Resources\refresh.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\inde_properties.png" />
+    <None Include="Resources\index_properties.png" />
     <Content Include="Resources\inspect1.png" />
     <Content Include="Resources\inspect2.png" />
     <Content Include="Resources\trash.png" />

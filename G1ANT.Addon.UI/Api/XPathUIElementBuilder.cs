@@ -37,22 +37,23 @@ namespace G1ANT.Addon.UI.Api
         {
             int index = 0;
             var treeWalker = GetTreeWalker(elem.AutomationElement);
-            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement).ToUIElement(index);
+            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement);
             while (elementNode != null)
             {
-                if (compare(elementNode, index))
+                var uiElement = elementNode.ToUIElement(index);
+                if (compare(uiElement, index))
                 {
-                    return elementNode;
+                    return uiElement;
                 }
 
-                var descendantElement = FindDescendant(elementNode, compare);
+                var descendantElement = FindDescendant(uiElement, compare);
                 if (descendantElement != null)
                 {
                     return descendantElement;
                 }
 
                 index++;
-                elementNode = treeWalker.GetNextSibling(elementNode.AutomationElement).ToUIElement(index);
+                elementNode = treeWalker.GetNextSibling(elementNode);
             }
             return null;
         }
@@ -67,16 +68,17 @@ namespace G1ANT.Addon.UI.Api
         {
             var index = 0;
             var treeWalker = GetTreeWalker(elem.AutomationElement);
-            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement).ToUIElement(index);
+            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement);
             while (elementNode != null)
             {
-                if (compare(elementNode, index))
+                var uiElement = elementNode.ToUIElement(index);
+                if (compare(uiElement, index))
                 {
-                    return elementNode;
+                    return uiElement;
                 }
 
                 index++;
-                elementNode = treeWalker.GetNextSibling(elementNode.AutomationElement).ToUIElement(index);
+                elementNode = treeWalker.GetNextSibling(elementNode);
             }
             throw new ElementNotAvailableException();
         }
@@ -85,16 +87,17 @@ namespace G1ANT.Addon.UI.Api
         {
             var index = 0;
             var treeWalker = GetTreeWalker(elem.AutomationElement);
-            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement).ToUIElement(index);
+            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement);
             while (elementNode != null)
             {
-                if (compare(elementNode, index))
+                var uiElement = elementNode.ToUIElement(index);
+                if (compare(uiElement, index))
                 {
-                    return elementNode;
+                    return uiElement;
                 }
 
                 index++;
-                elementNode = treeWalker.GetNextSibling(elementNode.AutomationElement).ToUIElement(index);
+                elementNode = treeWalker.GetNextSibling(elementNode);
             }
             throw new ElementNotAvailableException();
         }
@@ -130,31 +133,26 @@ namespace G1ANT.Addon.UI.Api
 
         protected object EqOperator(object left, object right)
         {
-            if (left is PropertyId propertyId)
+            if (left is string propertyName)
             {
                 return new CompareFunc((elem, index) =>
                 {
-                    return elem.AutomationElement.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue) && propValue != null && propValue.Equals(right);
+                    if (!elem.IsPropertySupported(propertyName))
+                        return false;
+                    var value = elem.GetPropertyValue(propertyName);
+                    if (value == null)
+                        return false;
+                    if (value.GetType() == right.GetType())
+                        return value.Equals(right);
+                    try
+                    {
+                        return value.Equals(Convert.ChangeType(right, value.GetType()));
+                    }
+                    catch
+                    {
+                        return value.ToString().Equals(right);
+                    }
                 });
-            }
-            else if (left is UiAutomationElement en)
-            {
-                if (UiAutomationElement.ProgrammaticName == en)
-                {
-                    return new CompareFunc((elem, index) =>
-                    {
-                        return elem.AutomationElement.Properties.ControlType.IsSupported 
-                            && elem.AutomationElement.Properties.ControlType.Value.ToString().Replace("ControlType.", "").Equals(right);
-                    });
-                }
-                if (UiAutomationElement.Id == en)
-                {
-                    return new CompareFunc((elem, index) =>
-                    {
-                        return elem.AutomationElement.Properties.ControlType.IsSupported 
-                            && elem.AutomationElement.Properties.ControlType.Value.ToString().Equals(right);
-                    });
-                }
             }
             throw new NotSupportedException("Left side of 'equal' operator has not been recognized.");
         }
@@ -217,24 +215,9 @@ namespace G1ANT.Addon.UI.Api
                 case XPathAxis.Child:
                     return (FindElementFunc)FindChild;
                 case XPathAxis.Attribute:
-                    return GetAttributeId(name.ToLower());
+                    return name.ToLower();
             }
             return null;
-        }
-
-        private object GetAttributeId(string name)
-        {
-            if (name == "id")
-                return AutomationObjectIds.AutomationIdProperty;
-            if (name == "name")
-                return AutomationObjectIds.NameProperty;
-            if (name == "class")
-                return AutomationObjectIds.ClassNameProperty;
-            if (name == "type")
-                return UiAutomationElement.ProgrammaticName;
-            if (name == "typeid")
-                return UiAutomationElement.Id;
-            throw new NotSupportedException($"Attribute {name} is not supportet.");
         }
 
         public object JoinStep(object left, object right)
@@ -285,21 +268,31 @@ namespace G1ANT.Addon.UI.Api
 
         public object Function(string prefix, string name, IList<object> args)
         {
-            if (args.Count == 2 && IsXpathFunction(name) && args[0] is PropertyId propertyId && args[1] is string text)
+            switch (name.ToLower())
+            {
+                case "starts-with": 
+                case "ends-with": 
+                case "contains":
+                    return BuildStringCompareFunction(name, args);
+            }
+
+            throw new NotSupportedException($"Function {name} is not supported.");
+        }
+
+        private CompareFunc BuildStringCompareFunction(string functionName, IList<object> args)
+        {
+            if (args.Count == 2 && args[0] is string propertyName && args[1] is string text)
             {
                 CompareFunc func = (elem, index) =>
                 {
-
-                    if (elem.AutomationElement.FrameworkAutomationElement.TryGetPropertyValue(propertyId, out var propValue))
-                    {
-                        return propValue is string str && IsConditionMet(name, str, text);
-                    }
-
-                    return false;
+                    if (!elem.IsPropertySupported(propertyName))
+                        return false;
+                    var value = elem.GetPropertyValue(propertyName);
+                    return value is string str && IsConditionMet(functionName, str, text);
                 };
                 return func;
             }
-            throw new NotSupportedException($"Function {name} is not supported.");
+            throw new NotSupportedException($"Function {functionName} should has two parameters.");
         }
 
         private bool IsConditionMet(string name, string str, string text)
@@ -312,12 +305,6 @@ namespace G1ANT.Addon.UI.Api
                 default: return false;
 
             }
-        }
-
-        private bool IsXpathFunction (string name)
-        {
-            name = name.ToLower();
-            return name == "starts-with" || name == "ends-with" || name == "contains";
         }
     }
 }
