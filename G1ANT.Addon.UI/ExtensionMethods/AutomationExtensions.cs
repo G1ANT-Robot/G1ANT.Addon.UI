@@ -41,7 +41,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
             return rootElement.Automation.TreeWalkerFactory.GetRawViewWalker();
         }
 
-        public static UIElement ToUIElement(this AutomationElement element, int index)
+        public static UIElement ToUIElement(this AutomationElement element, int index = -1)
         {
             return new UIElement(element, index);
         }

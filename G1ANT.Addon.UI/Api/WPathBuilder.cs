@@ -12,7 +12,7 @@ namespace G1ANT.Addon.UI.Api
         class UIElementCachedProperties : UIElement
         {
             private Dictionary<string, object> cachedProperties = new Dictionary<string, object>();
-            public UIElementCachedProperties(AutomationElement element, int index) : base(element, index)
+            public UIElementCachedProperties(AutomationElement element, int index = -1) : base(element, index)
             {
             }
 
@@ -38,39 +38,42 @@ namespace G1ANT.Addon.UI.Api
         }
 
         private const string DescendantPrefix = "/descendant::";
-        public static Dictionary<string, bool> SearchByProperties = new Dictionary<string, bool>()
+        public static Dictionary<string, bool> DefaultWPathProperties
         {
-            { UIElement.Indexes.Id, true },
-            { UIElement.Indexes.Class, true },
-            { UIElement.Indexes.Name, true },
-            { UIElement.Indexes.Type, true },
-            { UIElement.Indexes.Index, false }
-        };
-        private string[] GetSearchByProperties() => SearchByProperties.Where(x => x.Value).Select(x => x.Key).ToArray();
+            get => new Dictionary<string, bool>()
+            {
+                { UIElement.Indexes.Id, true },
+                { UIElement.Indexes.Class, true },
+                { UIElement.Indexes.Name, true },
+                { UIElement.Indexes.Type, true },
+                { UIElement.Indexes.Index, false }
+            };
+        }
+        private string[] GetDefaultWPathProperties() => DefaultWPathProperties.Where(x => x.Value).Select(x => x.Key).ToArray();
 
         public WPathBuilder()
         {
         }
 
-        public WPathStructure GetWPathStructure(AutomationElement element, AutomationElement rootElement = null)
+        public WPathStructure GetWPathStructure(AutomationElement element, AutomationElement rootElement = null, WPathBuilderOptions options = null)
         {
-            return new WPathStructure(GetSimpleWPath(element, rootElement));
+            return new WPathStructure(GetWPathWithProperties(element, rootElement, options));
         }
 
         public string GetWPath(AutomationElement element, AutomationElement rootElement = null)
         {
             var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
             var nodesDescriptionStack = BuildUIElementsStack(element, automationRoot);
-            return ConvertNodesDescriptionToWPath(nodesDescriptionStack.Pop(), nodesDescriptionStack);
+            return BuildWPathFromNodesStack(nodesDescriptionStack.Pop(), nodesDescriptionStack);
         }
 
-        public string GetSimpleWPath(AutomationElement element, AutomationElement rootElement = null,
-            List<string> properties = null)
+        public string GetWPathWithProperties(AutomationElement element, AutomationElement rootElement = null,
+            WPathBuilderOptions options = null)
         {
             var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
             var nodesDescriptionStack = BuildUIElementsStack(element, automationRoot);
             nodesDescriptionStack.Pop();
-            return NodesToSimpleWPath(nodesDescriptionStack, properties);
+            return BuildWPathFromNodesStackWithProperties(nodesDescriptionStack, options);
         }
 
         public Stack<UIElement> BuildUIElementsStack(AutomationElement element, AutomationElement rootElement)
@@ -81,31 +84,12 @@ namespace G1ANT.Addon.UI.Api
 
             foreach (var item in stack)
             {
-                var index = FindElementIndexInParent(parent, item);
-                var uiElement = new UIElementCachedProperties(item, index);
+                var uiElement = new UIElementCachedProperties(item);
                 elementList.Add(uiElement);
                 parent = item;
             }
             elementList.Reverse();
             return new Stack<UIElement>(elementList);
-        }
-
-        private int FindElementIndexInParent(AutomationElement parent, AutomationElement element)
-        {
-            if (parent == null)
-                return 0;
-
-            var index = 0;
-            var treeWalker = parent.GetTreeWalker();
-            var elementNode = treeWalker.GetFirstChild(parent);
-            while (elementNode != null)
-            {
-                if (elementNode.Equals(element))
-                    return index;
-                index++;
-                elementNode = treeWalker.GetNextSibling(elementNode);
-            }
-            throw new ElementNotAvailableException();
         }
 
         private Stack<AutomationElement> BuildAutomationElementsStack(AutomationElement element, AutomationElement rootElement)
@@ -139,20 +123,37 @@ namespace G1ANT.Addon.UI.Api
             return elementStack;
         }
 
-        private string NodesToSimpleWPath(Stack<UIElement> nodesStack, List<string> properties = null)
+        private string BuildWPathFromNodesStackWithProperties(Stack<UIElement> nodesStack, WPathBuilderOptions options = null)
         {
             string wpath = "";
-            var fillPropsSet = properties ?? GetSearchByProperties().ToList();
+            var properties = options?.Properties ?? GetDefaultWPathProperties().ToList();
+            var rootProperties = options?.RootProperties ?? GetDefaultWPathProperties().ToList();
 
-            foreach (var node in nodesStack)
+            var nodeFilters = nodesStack.Select((x, idx) =>
             {
-                var xpath = BuildXpathPart(node, fillPropsSet);
-                wpath += $"/{xpath}";
+                var filter = BuildFilterExpression(x, idx == 0 ? rootProperties : properties);
+                if (idx == nodesStack.Count - 1 && string.IsNullOrEmpty(filter))
+                    filter = BuildFilterExpression(x, GetDefaultWPathProperties().ToList());
+                return filter;
+            });
+            foreach (var filter in nodeFilters)
+            {
+                if (string.IsNullOrEmpty(filter))
+                {
+                    if (!wpath.EndsWith(DescendantPrefix))
+                        wpath += DescendantPrefix;
+                }
+                else
+                {
+                    if (!wpath.EndsWith(DescendantPrefix))
+                        wpath += "/";
+                    wpath += BuildUiElementPart(filter);
+                }
             }
             return wpath;
         }
 
-        private string ConvertNodesDescriptionToWPath(UIElement parent, Stack<UIElement> nodesDescriptionStack)
+        private string BuildWPathFromNodesStack(UIElement parent, Stack<UIElement> nodesDescriptionStack)
         {
             if (nodesDescriptionStack.Count == 0)
                 return string.Empty;
@@ -164,23 +165,23 @@ namespace G1ANT.Addon.UI.Api
 
             if (children.Count == 1 && nodesDescriptionStack.Count > 1)
             {
-                var xpath = ConvertNodesDescriptionToWPath(currentElement, nodesDescriptionStack);
+                var xpath = BuildWPathFromNodesStack(currentElement, nodesDescriptionStack);
                 if (string.IsNullOrEmpty(xpath) || xpath.StartsWith(DescendantPrefix))
                     return xpath;
                 return DescendantPrefix + xpath.Remove(0, 1);
             }
 
-            foreach (var searchByProps in GetPossibleCombinations(GetSearchByProperties()))
+            foreach (var searchByProps in GetPossibleCombinations(GetDefaultWPathProperties()))
             {
                 if (HasUniqueProperties(searchByProps, currentElement, children))
                 {
                     var xpath = BuildXpathPart(currentElement, searchByProps);
-                    return $"/{xpath}" + ConvertNodesDescriptionToWPath(currentElement, nodesDescriptionStack);
+                    return $"/{xpath}" + BuildWPathFromNodesStack(currentElement, nodesDescriptionStack);
                 }
             }
 
             var currentElementIndex = children.FindIndex(x => x.Equals(currentElement));
-            return $"/ui[{currentElementIndex}]" + ConvertNodesDescriptionToWPath(currentElement, nodesDescriptionStack);
+            return $"/{BuildUiElementPart(currentElementIndex.ToString())}" + BuildWPathFromNodesStack(currentElement, nodesDescriptionStack);
         }
 
         private bool HasUniqueProperties(List<string> propNames, UIElement element, List<UIElement> searchIn)
@@ -200,13 +201,13 @@ namespace G1ANT.Addon.UI.Api
             return true;
         }
 
-        private string BuildFilterCondition(UIElement element, List<string> propNames)
+        private string BuildFilterExpression(UIElement element, List<string> propNames)
         {
             List<string> filters = new List<string>();
             foreach (var propName in propNames)
             {
                 var val = element.GetPropertyValue(propName);
-                if (val != null)
+                if (!string.IsNullOrEmpty(val?.ToString()))
                 {
                     filters.Add(BuildFilterPart(propName, val));
                 }
@@ -224,7 +225,12 @@ namespace G1ANT.Addon.UI.Api
 
         private string BuildXpathPart(UIElement element, List<string> properties)
         {
-            var filter = BuildFilterCondition(element, properties);
+            var filter = BuildFilterExpression(element, properties);
+            return BuildUiElementPart(filter);
+        }
+
+        private string BuildUiElementPart(string filter)
+        {
             return $"ui[{filter}]";
         }
 

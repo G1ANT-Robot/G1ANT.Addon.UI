@@ -97,6 +97,7 @@
     <Compile Include="Api\Patterns\UIValuePattern.cs" />
     <Compile Include="Api\UIPatternWrapper.cs" />
     <Compile Include="Api\WPathBuilder.cs" />
+    <Compile Include="Api\WPathBuilderOptions.cs" />
     <Compile Include="Api\WPathPropertiesSelectorButton.cs">
       <SubType>Component</SubType>
     </Compile>
