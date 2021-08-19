@@ -24,7 +24,7 @@ namespace G1ANT.Addon.UI.Api
                 AutomationElement = element;
                 Image = FlaUI.Core.Capturing.Capture.Element(element)?.Bitmap;
                 Name = element.Name;
-                WPath = wpathBuilder.GetSimpleWPath(element);
+                WPath = wpathBuilder.GetWPathWithProperties(element, options: WPathPropertiesSelectorButton.Options);
             }
         }
 

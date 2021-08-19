@@ -48,7 +48,17 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        public int Index { get; private set; }
+        private int _index = -1;
+        public int Index 
+        { 
+            get
+            {
+                if (_index == -1)
+                    _index = FindElementIndex();
+                return _index;
+            }
+            private set => _index = value; 
+        }
 
         private UIElement() { }
 
@@ -57,7 +67,7 @@ namespace G1ANT.Addon.UI.Api
             cachedWPath = new WPathStructure(wPath);
         }
 
-        public UIElement(AutomationElement element, int index)
+        public UIElement(AutomationElement element, int index = -1)
         {
             AutomationElement = element ?? throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
             Index = index;
@@ -66,6 +76,24 @@ namespace G1ANT.Addon.UI.Api
         public static UIElement FromWPath(WPathStructure wPath)
         {
             return FromWPath(wPath.Value);
+        }
+
+        private int FindElementIndex()
+        {
+            if (AutomationElement?.Parent == null)
+                return -1;
+
+            var index = 0;
+            var treeWalker = AutomationElement.Parent.GetTreeWalker();
+            var elementNode = treeWalker.GetFirstChild(AutomationElement.Parent);
+            while (elementNode != null)
+            {
+                if (elementNode.Equals(AutomationElement))
+                    return index;
+                index++;
+                elementNode = treeWalker.GetNextSibling(elementNode);
+            }
+            return -1;
         }
 
         public override bool Equals(Object obj)
@@ -96,14 +124,14 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        public WPathStructure ToWPath(AutomationElement rootElement = null, bool rebuild = false)
+        public WPathStructure ToWPath(AutomationElement rootElement = null, bool rebuild = false, WPathBuilderOptions options = null)
         {
             if (cachedWPath == null || rebuild)
             {
                 try
                 {
                     var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-                    cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot);
+                    cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot, options);
                 }
                 catch
                 {

@@ -12,6 +12,8 @@ namespace G1ANT.Addon.UI.Api
         private bool initialized = false;
         const string RegistryPath = @"HKEY_CURRENT_USER\Software\G1ANT.Robot\G1ANT.Addon.UI";
 
+        static public WPathBuilderOptions Options { get; private set; }
+
         public WPathPropertiesSelectorButton()
         {
             InitializeComponent();
@@ -22,50 +24,80 @@ namespace G1ANT.Addon.UI.Api
         private void Initialize()
         {
             LoadSettings();
-            foreach (var property in WPathBuilder.SearchByProperties)
-                AddSearchByProperty(property.Key, property.Value);
+
+            var rootDropDown = new ToolStripMenuItem("Root");
+
+            foreach (var property in WPathBuilder.DefaultWPathProperties)
+            {
+                AddMenuItem(DropDownItems, property.Key, Options.Properties);
+                AddMenuItem(rootDropDown.DropDownItems, property.Key, Options.RootProperties);
+            }
+            DropDownItems.Add(new ToolStripSeparator());
+            DropDownItems.Add(rootDropDown);
+
             initialized = true;
         }
 
         private void SaveSettings()
         {
-            Registry.SetValue(RegistryPath, typeof(WPathPropertiesSelectorButton).Name, JsonConvert.SerializeObject(WPathBuilder.SearchByProperties));
+            Registry.SetValue(RegistryPath, "WPathBuilderOptions.Properties", string.Join(",", Options.Properties));
+            Registry.SetValue(RegistryPath, "WPathBuilderOptions.RootProperties", string.Join(",", Options.RootProperties));
         }
 
         private void LoadSettings()
         {
-            var value = (string)Registry.GetValue(RegistryPath, typeof(WPathPropertiesSelectorButton).Name, null);
-            if (value != null)
+            if (Options != null)
+                return;
+
+             Options = new WPathBuilderOptions()
+             {
+                 Properties = new List<string>(),
+                 RootProperties = new List<string>()
+             };
+
+            var properties = Registry.GetValue(RegistryPath, "WPathBuilderOptions.Properties", null) as string;
+            var rootProperties = Registry.GetValue(RegistryPath, "WPathBuilderOptions.RootProperties", null) as string;
+
+            InitOptionsList(Options.Properties, properties);
+            InitOptionsList(Options.RootProperties, rootProperties);
+        }
+
+        private void InitOptionsList(List<string> propertiesList, string initValue)
+        {
+            if (initValue != null)
             {
-                try
-                {
-                    var savedProperties = JsonConvert.DeserializeObject<Dictionary<string, bool>>(value);
-                    foreach (var property in savedProperties)
-                        WPathBuilder.SearchByProperties[property.Key] = property.Value;
-                }
-                catch
-                { }
+                var list = initValue.Split(',').Concat(propertiesList).Distinct();
+                propertiesList.Clear();
+                propertiesList.AddRange(list);
+            }
+            else
+            {
+                foreach (var property in WPathBuilder.DefaultWPathProperties.Where(x => x.Value))
+                    propertiesList.Add(property.Key);
             }
         }
 
-        private void AddSearchByProperty(string name, bool isChecked)
+        private void AddMenuItem(ToolStripItemCollection root, string name, List<string> properties)
         {
-            var item = DropDownItems.Add(name) as ToolStripMenuItem;
+            var item = root.Add(name) as ToolStripMenuItem;
             item.Checked = true;
             item.CheckOnClick = true;
-            item.CheckState = isChecked ? CheckState.Checked : CheckState.Unchecked;
-            item.Tag = name;
+            item.CheckState = properties.Contains(name) ? CheckState.Checked : CheckState.Unchecked;
+            item.Tag = properties;
             item.CheckStateChanged += OnCheckStateChanged;
         }
 
         private void OnCheckStateChanged(object sender, EventArgs e)
         {
-            if (sender is ToolStripMenuItem item)
+            if (sender is ToolStripMenuItem item && item.Tag is List<string> properties)
             {
-                var nbOfSelected = WPathBuilder.SearchByProperties.Count(x => x.Value);
+                var nbOfSelected = properties.Count;
                 if (!(item.CheckState == CheckState.Unchecked && nbOfSelected == 1))
                 {
-                    WPathBuilder.SearchByProperties[item.Tag.ToString()] = item.CheckState == CheckState.Checked;
+                    if (item.CheckState == CheckState.Checked)
+                        properties.Add(item.Text);
+                    else
+                        properties.Remove(item.Text);
                     SaveSettings();
                 }
             }
@@ -76,9 +108,22 @@ namespace G1ANT.Addon.UI.Api
             if (!initialized)
                 Initialize();
 
-            foreach (ToolStripMenuItem item in DropDownItems)
-                item.CheckState = WPathBuilder.SearchByProperties[item.Tag.ToString()] ? CheckState.Checked : CheckState.Unchecked;
+            CheckWPathProperties(DropDownItems);
         }
 
+        private void CheckWPathProperties(ToolStripItemCollection items)
+        {
+            foreach (var item in items)
+            {
+                if (item is ToolStripMenuItem menuItem)
+                {
+                    if (menuItem.Tag is List<string> properties)
+                        menuItem.CheckState = properties.Contains(menuItem.Text) ? CheckState.Checked : CheckState.Unchecked;
+                    else
+                        CheckWPathProperties(menuItem.DropDownItems);
+                }
+            }
+
+        }
     }
 }

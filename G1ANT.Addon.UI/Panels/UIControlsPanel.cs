@@ -148,7 +148,8 @@ namespace G1ANT.Addon.UI.Panels
                 {
                     if (controlsTree.SelectedNode.Tag is UIElement uiElement)
                     {
-                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{uiElement.ToWPath(rebuild: true)}{SpecialChars.Text}");
+                        var wpath = uiElement.ToWPath(rebuild: true, options: WPathPropertiesSelectorButton.Options);
+                        MainForm.InsertTextIntoCurrentEditor($"{SpecialChars.Text}{wpath}{SpecialChars.Text}");
                     }
                 }
             }

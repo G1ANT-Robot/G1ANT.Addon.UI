@@ -34,6 +34,7 @@
             this.inspectSingleButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.refreshButton = new System.Windows.Forms.ToolStripButton();
+            this.wpathPropertiesSelector = new G1ANT.Addon.UI.Api.WPathPropertiesSelectorButton();
             this.controlsTree = new System.Windows.Forms.TreeView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.highlightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,7 +42,6 @@
             this.Property = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.wpathPropertiesSelector = new G1ANT.Addon.UI.Api.WPathPropertiesSelectorButton();
             this.toolStrip.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.propertiesGrid)).BeginInit();
@@ -100,6 +100,15 @@
             this.refreshButton.Size = new System.Drawing.Size(23, 22);
             this.refreshButton.Text = "Refresh controls";
             this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+            // 
+            // wpathPropertiesSelector
+            // 
+            this.wpathPropertiesSelector.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.wpathPropertiesSelector.Image = global::G1ANT.Addon.UI.Resources.index_properties;
+            this.wpathPropertiesSelector.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.wpathPropertiesSelector.Name = "wpathPropertiesSelector";
+            this.wpathPropertiesSelector.Size = new System.Drawing.Size(29, 22);
+            this.wpathPropertiesSelector.Text = "wPathPropertiesSelectorButton1";
             // 
             // controlsTree
             // 
@@ -189,15 +198,6 @@
             this.splitContainer1.Size = new System.Drawing.Size(222, 426);
             this.splitContainer1.SplitterDistance = 300;
             this.splitContainer1.TabIndex = 3;
-            // 
-            // wpathPropertiesSelector
-            // 
-            this.wpathPropertiesSelector.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.wpathPropertiesSelector.Image = global::G1ANT.Addon.UI.Resources.index_properties;
-            this.wpathPropertiesSelector.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.wpathPropertiesSelector.Name = "wpathPropertiesSelector";
-            this.wpathPropertiesSelector.Size = new System.Drawing.Size(29, 22);
-            this.wpathPropertiesSelector.Text = "wPathPropertiesSelectorButton1";
             // 
             // UIControlsPanel
             // 
