@@ -36,10 +36,9 @@ namespace G1ANT.Addon.UI.Api
                 {
                     if (cachedWPath == null)
                         throw new NullReferenceException("AutomationElement has not been initialized");
-                    var element = AutomationElementFromWPath(cachedWPath?.Value);
-                    if (element == null)
-                        throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
-                    automationElement = element;
+                    var element = FromWPath(cachedWPath?.Value);
+                    automationElement = element.AutomationElement;
+                    Index = element.Index;
                 }
                 return automationElement;
             }
@@ -49,6 +48,18 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
+        private int _index = -1;
+        public int Index 
+        { 
+            get
+            {
+                if (_index == -1)
+                    _index = FindElementIndex();
+                return _index;
+            }
+            private set => _index = value; 
+        }
+
         private UIElement() { }
 
         public UIElement(string wPath)
@@ -56,9 +67,10 @@ namespace G1ANT.Addon.UI.Api
             cachedWPath = new WPathStructure(wPath);
         }
 
-        public UIElement(AutomationElement element)
+        public UIElement(AutomationElement element, int index = -1)
         {
             AutomationElement = element ?? throw new NullReferenceException("Cannot create UIElement class from empty AutomationElement");
+            Index = index;
         }
 
         public static UIElement FromWPath(WPathStructure wPath)
@@ -66,23 +78,35 @@ namespace G1ANT.Addon.UI.Api
             return FromWPath(wPath.Value);
         }
 
+        private int FindElementIndex()
+        {
+            if (AutomationElement?.Parent == null)
+                return -1;
+
+            var index = 0;
+            var treeWalker = AutomationElement.Parent.GetTreeWalker();
+            var elementNode = treeWalker.GetFirstChild(AutomationElement.Parent);
+            while (elementNode != null)
+            {
+                if (elementNode.Equals(AutomationElement))
+                    return index;
+                index++;
+                elementNode = treeWalker.GetNextSibling(elementNode);
+            }
+            return -1;
+        }
+
         public override bool Equals(Object obj)
         {
             return obj is UIElement elem && elem.AutomationElement.Equals(AutomationElement);
         }
 
-        public static AutomationElement AutomationElementFromWPath(string wPath)
-        {
-            var xe = new XPathParser<object>().Parse(wPath, new XPathUIElementBuilder(RootElement?.AutomationElement));
-            return xe as AutomationElement;
-        }
-
         public static UIElement FromWPath(string wPath)
         {
-            var element = AutomationElementFromWPath(wPath);
-            if (element != null)
+            var element = new XPathParser<object>().Parse(wPath, new XPathUIElementBuilder(RootElement?.AutomationElement));
+            if (element is UIElement uiElement)
             {
-                return new UIElement() { AutomationElement = element };
+                return uiElement;
             }
             throw new NullReferenceException($"Cannot find UI element described by \"{wPath}\".");
         }
@@ -100,12 +124,19 @@ namespace G1ANT.Addon.UI.Api
             }
         }
 
-        public WPathStructure ToWPath(AutomationElement rootElement = null)
+        public WPathStructure ToWPath(AutomationElement rootElement = null, bool rebuild = false, WPathBuilderOptions options = null)
         {
-            if (cachedWPath == null)
+            if (cachedWPath == null || rebuild)
             {
-                var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-                cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot);
+                try
+                {
+                    var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
+                    cachedWPath = wPathBuilder.GetWPathStructure(AutomationElement, automationRoot, options);
+                }
+                catch
+                {
+                    return new WPathStructure("");
+                }
             }
             return cachedWPath;
         }

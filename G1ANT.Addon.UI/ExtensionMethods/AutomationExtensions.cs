@@ -1,6 +1,7 @@
 ﻿using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.UIA3.Patterns;
+using G1ANT.Addon.UI.Api;
 using System;
 
 namespace G1ANT.Addon.UI.ExtensionMethods
@@ -37,8 +38,12 @@ namespace G1ANT.Addon.UI.ExtensionMethods
         public static ITreeWalker GetTreeWalker(this AutomationElement element)
         {
             var rootElement = element ?? throw new ArgumentException();
-            return rootElement.Automation.TreeWalkerFactory.GetControlViewWalker();
+            return rootElement.Automation.TreeWalkerFactory.GetRawViewWalker();
         }
 
+        public static UIElement ToUIElement(this AutomationElement element, int index = -1)
+        {
+            return new UIElement(element, index);
+        }
     }
 }

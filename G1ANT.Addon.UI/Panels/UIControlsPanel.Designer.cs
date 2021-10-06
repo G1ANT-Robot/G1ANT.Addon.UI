@@ -30,7 +30,11 @@
         {
             this.components = new System.ComponentModel.Container();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.insertWPathButton = new System.Windows.Forms.ToolStripButton();
+            this.inspectSingleButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.refreshButton = new System.Windows.Forms.ToolStripButton();
+            this.wpathPropertiesSelector = new G1ANT.Addon.UI.Api.WPathPropertiesSelectorButton();
             this.controlsTree = new System.Windows.Forms.TreeView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.highlightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -38,9 +42,6 @@
             this.Property = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.insertWPathButton = new System.Windows.Forms.ToolStripButton();
-            this.inspectSingleButton = new System.Windows.Forms.ToolStripButton();
-            this.refreshButton = new System.Windows.Forms.ToolStripButton();
             this.toolStrip.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.propertiesGrid)).BeginInit();
@@ -56,17 +57,58 @@
             this.insertWPathButton,
             this.inspectSingleButton,
             this.toolStripSeparator1,
-            this.refreshButton});
+            this.refreshButton,
+            this.wpathPropertiesSelector});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
             this.toolStrip.Name = "toolStrip";
             this.toolStrip.Size = new System.Drawing.Size(222, 25);
             this.toolStrip.TabIndex = 0;
             this.toolStrip.Text = "toolStrip1";
             // 
+            // insertWPathButton
+            // 
+            this.insertWPathButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.insertWPathButton.Image = global::G1ANT.Addon.UI.Resources.insert_into;
+            this.insertWPathButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.insertWPathButton.Name = "insertWPathButton";
+            this.insertWPathButton.Size = new System.Drawing.Size(23, 22);
+            this.insertWPathButton.Text = "Insert WPath";
+            this.insertWPathButton.ToolTipText = "Insert WPath of selected control";
+            this.insertWPathButton.Click += new System.EventHandler(this.insertWPathButton_Click);
+            // 
+            // inspectSingleButton
+            // 
+            this.inspectSingleButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.inspectSingleButton.Image = global::G1ANT.Addon.UI.Resources.inspect1;
+            this.inspectSingleButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.inspectSingleButton.Name = "inspectSingleButton";
+            this.inspectSingleButton.Size = new System.Drawing.Size(23, 22);
+            this.inspectSingleButton.Text = "Inspect single UI element";
+            this.inspectSingleButton.Click += new System.EventHandler(this.inspectSingleButton_Click);
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // refreshButton
+            // 
+            this.refreshButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.refreshButton.Image = global::G1ANT.Addon.UI.Resources.refresh;
+            this.refreshButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.refreshButton.Name = "refreshButton";
+            this.refreshButton.Size = new System.Drawing.Size(23, 22);
+            this.refreshButton.Text = "Refresh controls";
+            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+            // 
+            // wpathPropertiesSelector
+            // 
+            this.wpathPropertiesSelector.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.wpathPropertiesSelector.Image = global::G1ANT.Addon.UI.Resources.index_properties;
+            this.wpathPropertiesSelector.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.wpathPropertiesSelector.Name = "wpathPropertiesSelector";
+            this.wpathPropertiesSelector.Size = new System.Drawing.Size(29, 22);
+            this.wpathPropertiesSelector.Text = "wPathPropertiesSelectorButton1";
             // 
             // controlsTree
             // 
@@ -157,37 +199,6 @@
             this.splitContainer1.SplitterDistance = 300;
             this.splitContainer1.TabIndex = 3;
             // 
-            // insertWPathButton
-            // 
-            this.insertWPathButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.insertWPathButton.Image = global::G1ANT.Addon.UI.Resources.insert_into;
-            this.insertWPathButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.insertWPathButton.Name = "insertWPathButton";
-            this.insertWPathButton.Size = new System.Drawing.Size(23, 22);
-            this.insertWPathButton.Text = "Insert WPath";
-            this.insertWPathButton.ToolTipText = "Insert WPath of selected control";
-            this.insertWPathButton.Click += new System.EventHandler(this.insertWPathButton_Click);
-            // 
-            // inspectSingleButton
-            // 
-            this.inspectSingleButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.inspectSingleButton.Image = global::G1ANT.Addon.UI.Resources.inspect1;
-            this.inspectSingleButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.inspectSingleButton.Name = "inspectSingleButton";
-            this.inspectSingleButton.Size = new System.Drawing.Size(23, 22);
-            this.inspectSingleButton.Text = "Inspect single UI element";
-            this.inspectSingleButton.Click += new System.EventHandler(this.inspectSingleButton_Click);
-            // 
-            // refreshButton
-            // 
-            this.refreshButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.refreshButton.Image = global::G1ANT.Addon.UI.Resources.refresh;
-            this.refreshButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.refreshButton.Name = "refreshButton";
-            this.refreshButton.Size = new System.Drawing.Size(23, 22);
-            this.refreshButton.Text = "Refresh controls";
-            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
-            // 
             // UIControlsPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -223,5 +234,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Property;
         private System.Windows.Forms.DataGridViewTextBoxColumn Value;
         private System.Windows.Forms.ToolStripButton inspectSingleButton;
+        private Api.WPathPropertiesSelectorButton wpathPropertiesSelector;
     }
 }
