@@ -1,5 +1,4 @@
 ﻿using FlaUI.Core.AutomationElements;
-using FlaUI.Core.Exceptions;
 using G1ANT.Addon.UI.ExtensionMethods;
 using G1ANT.Addon.UI.Structures;
 using System.Collections.Generic;
@@ -64,7 +63,7 @@ namespace G1ANT.Addon.UI.Api
         {
             var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
             var nodesDescriptionStack = BuildUIElementsStack(element, automationRoot);
-            return BuildWPathFromNodesStack(nodesDescriptionStack.Pop(), nodesDescriptionStack);
+            return $"/v2{BuildWPathFromNodesStack(nodesDescriptionStack.Pop(), nodesDescriptionStack)}";
         }
 
         public string GetWPathWithProperties(AutomationElement element, AutomationElement rootElement = null,
@@ -73,7 +72,7 @@ namespace G1ANT.Addon.UI.Api
             var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
             var nodesDescriptionStack = BuildUIElementsStack(element, automationRoot);
             nodesDescriptionStack.Pop();
-            return BuildWPathFromNodesStackWithProperties(nodesDescriptionStack, options);
+            return $"/v2{BuildWPathFromNodesStackWithProperties(nodesDescriptionStack, options)}";
         }
 
         public Stack<UIElement> BuildUIElementsStack(AutomationElement element, AutomationElement rootElement)
@@ -96,8 +95,6 @@ namespace G1ANT.Addon.UI.Api
         {
             var elementStack = new Stack<AutomationElement>();
             var node = element;
-            var automationRoot = rootElement ?? AutomationSingleton.Automation.GetDesktop();
-            var walker = automationRoot.GetTreeWalker();
 
             do          
             {
@@ -111,7 +108,7 @@ namespace G1ANT.Addon.UI.Api
                     break;
                 }
                 elementStack.Push(node);
-                var elementParent = walker.GetParent(node);
+                var elementParent = node.GetParentControl();
                 if (elementParent == null)
                 {
                     break;

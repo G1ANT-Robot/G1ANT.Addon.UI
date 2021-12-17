@@ -87,11 +87,15 @@
     <Compile Include="Api\InspectUIElement.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Api\Interfaces\IXPathUIElementFinder.cs" />
     <Compile Include="Api\Patterns\IUIPattern.cs" />
     <Compile Include="Api\Patterns\UILegacyIAccessiblePattern.cs" />
     <Compile Include="Api\Patterns\UIPatternBase.cs" />
     <Compile Include="Api\Patterns\UISelectionItemPattern.cs" />
     <Compile Include="Api\Patterns\UISelectionPattern.cs" />
+    <Compile Include="Api\Services\XPathUIElementFinderBase.cs" />
+    <Compile Include="Api\Services\XPathUIElementFinderV1.cs" />
+    <Compile Include="Api\Services\XPathUIElementFinderV2.cs" />
     <Compile Include="Api\UIElement+Properties.cs" />
     <Compile Include="Api\UIElement.cs" />
     <Compile Include="Api\Patterns\UIValuePattern.cs" />

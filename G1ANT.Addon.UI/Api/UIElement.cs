@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Drawing;
 using System.Threading;
-using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Input;
 using G1ANT.Addon.UI.Enums;
@@ -15,8 +14,6 @@ using InvokePattern = FlaUI.UIA3.Patterns.InvokePattern;
 using SelectionItemPattern = FlaUI.UIA3.Patterns.SelectionItemPattern;
 using ValuePattern = FlaUI.UIA3.Patterns.ValuePattern;
 using FlaUI.Core.Definitions;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace G1ANT.Addon.UI.Api
 {
@@ -80,20 +77,14 @@ namespace G1ANT.Addon.UI.Api
 
         private int FindElementIndex()
         {
-            if (AutomationElement?.Parent == null)
+            var parent = AutomationElement?.GetParentControl();
+            if (parent == null)
                 return -1;
 
-            var index = 0;
-            var treeWalker = AutomationElement.Parent.GetTreeWalker();
-            var elementNode = treeWalker.GetFirstChild(AutomationElement.Parent);
-            while (elementNode != null)
-            {
-                if (elementNode.Equals(AutomationElement))
-                    return index;
-                index++;
-                elementNode = treeWalker.GetNextSibling(elementNode);
-            }
-            return -1;
+            var foundElement = parent.FindAllChildren()
+                .Select((element, index) => new { element, index })
+                .FirstOrDefault(x => x.element.Equals(AutomationElement));
+            return foundElement != null ? foundElement.index : -1;
         }
 
         public override bool Equals(Object obj)
