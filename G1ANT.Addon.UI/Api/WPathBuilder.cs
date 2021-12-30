@@ -162,10 +162,7 @@ namespace G1ANT.Addon.UI.Api
 
             if (children.Count == 1 && nodesDescriptionStack.Count > 1)
             {
-                var xpath = BuildWPathFromNodesStack(currentElement, nodesDescriptionStack);
-                if (string.IsNullOrEmpty(xpath) || xpath.StartsWith(DescendantPrefix))
-                    return xpath;
-                return DescendantPrefix + xpath.Remove(0, 1);
+                return $"/ui[0]" + BuildWPathFromNodesStack(currentElement, nodesDescriptionStack);
             }
 
             foreach (var searchByProps in GetPossibleCombinations(GetDefaultWPathProperties()))
@@ -198,18 +195,26 @@ namespace G1ANT.Addon.UI.Api
             return true;
         }
 
-        private string BuildFilterExpression(UIElement element, List<string> propNames)
+        private Dictionary<string, string> GetPropertiesValues(UIElement element, List<string> propNames)
         {
-            List<string> filters = new List<string>();
+            var values = new Dictionary<string, string>();
             foreach (var propName in propNames)
             {
                 var val = element.GetPropertyValue(propName);
                 if (!string.IsNullOrEmpty(val?.ToString()))
-                {
-                    filters.Add(BuildFilterPart(propName, val));
-                }
+                    values.Add(propName, val.ToString());
             }
-            return string.Join(" and ", filters);
+            return values;
+        }
+
+        private string BuildFilterExpression(UIElement element, List<string> propNames)
+        {
+            var properties = GetPropertiesValues(element, propNames);
+            if (properties.Count == 0)
+                return element.Index >= 0 ? element.Index.ToString() : string.Empty;
+            else if (properties.Count == 1 && properties.ContainsKey(UIElement.Indexes.Index))
+                return properties.FirstOrDefault().Value;
+            return string.Join(" and ", properties.Select(x => BuildFilterPart(x.Key, x.Value)));
         }
 
         private string BuildFilterPart(string name, object value)
@@ -237,7 +242,7 @@ namespace G1ANT.Addon.UI.Api
             foreach (var propName in propNames)
             {
                 var val = element.GetPropertyValue(propName);
-                if (val != null)
+                if (!string.IsNullOrEmpty(val?.ToString()))
                     result += $"#{val}";
             }
             return result;

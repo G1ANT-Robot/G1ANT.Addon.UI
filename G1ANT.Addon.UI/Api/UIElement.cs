@@ -81,10 +81,7 @@ namespace G1ANT.Addon.UI.Api
             if (parent == null)
                 return -1;
 
-            var foundElement = parent.FindAllChildren()
-                .Select((element, index) => new { element, index })
-                .FirstOrDefault(x => x.element.Equals(AutomationElement));
-            return foundElement != null ? foundElement.index : -1;
+            return parent.FindAllChildren().ToList().FindIndex(x => x.Equals(AutomationElement));
         }
 
         public override bool Equals(Object obj)
