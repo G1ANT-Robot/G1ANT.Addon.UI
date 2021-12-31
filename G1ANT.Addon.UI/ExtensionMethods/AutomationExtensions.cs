@@ -29,7 +29,7 @@ namespace G1ANT.Addon.UI.ExtensionMethods
             var currentElement = element;
             while (currentElement != null && !desktop.Equals(currentElement.Parent))
             {
-                currentElement = currentElement.Parent;
+                currentElement = currentElement.GetParentControl();
             }
 
             return currentElement;
@@ -44,6 +44,11 @@ namespace G1ANT.Addon.UI.ExtensionMethods
         public static UIElement ToUIElement(this AutomationElement element, int index = -1)
         {
             return new UIElement(element, index);
+        }
+
+        public static AutomationElement GetParentControl(this AutomationElement element)
+        {
+            return element?.Automation.TreeWalkerFactory.GetControlViewWalker().GetParent(element);
         }
     }
 }

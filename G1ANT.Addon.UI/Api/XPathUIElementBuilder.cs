@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Exceptions;
-using FlaUI.Core.Identifiers;
-using FlaUI.UIA3.Identifiers;
 using G1ANT.Addon.UI.XPathParser;
 using CompareFunc = System.Func<G1ANT.Addon.UI.Api.UIElement, int, bool>;
 using GetElementFunc = System.Func<
@@ -16,11 +14,15 @@ using FindElementFunc = System.Func<
     G1ANT.Addon.UI.Api.UIElement>;
 using NotSupportedException = System.NotSupportedException;
 using G1ANT.Addon.UI.ExtensionMethods;
+using G1ANT.Addon.UI.Api.Interfaces;
+using G1ANT.Addon.UI.Api.Services;
 
 namespace G1ANT.Addon.UI.Api
 {
     public class XPathUIElementBuilder : IXPathBuilder<object>
     {
+        private IXPathUIElementFinder uIElementFinder = null;
+
         public enum UiAutomationElement
         {
             Id,
@@ -35,78 +37,22 @@ namespace G1ANT.Addon.UI.Api
 
         protected UIElement FindDescendant(UIElement elem, CompareFunc compare)
         {
-            int index = 0;
-            var treeWalker = GetTreeWalker(elem.AutomationElement);
-            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement);
-            while (elementNode != null)
-            {
-                var uiElement = elementNode.ToUIElement(index);
-                if (compare(uiElement, index))
-                {
-                    return uiElement;
-                }
-
-                var descendantElement = FindDescendant(uiElement, compare);
-                if (descendantElement != null)
-                {
-                    return descendantElement;
-                }
-
-                index++;
-                elementNode = treeWalker.GetNextSibling(elementNode);
-            }
-            return null;
-        }
-
-        private ITreeWalker GetTreeWalker(AutomationElement elem)
-        {
-            var rootElement = elem ?? Root;
-            return rootElement.GetTreeWalker();
+            return uIElementFinder.FindDescendant(elem, compare);
         }
 
         protected UIElement FindChild(UIElement elem, CompareFunc compare)
         {
-            var index = 0;
-            var treeWalker = GetTreeWalker(elem.AutomationElement);
-            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement);
-            while (elementNode != null)
-            {
-                var uiElement = elementNode.ToUIElement(index);
-                if (compare(uiElement, index))
-                {
-                    return uiElement;
-                }
-
-                index++;
-                elementNode = treeWalker.GetNextSibling(elementNode);
-            }
-            throw new ElementNotAvailableException();
+            return uIElementFinder.FindChild(elem, compare);
         }
 
         protected UIElement FindFollowingSibling(UIElement elem, CompareFunc compare)
         {
-            var index = 0;
-            var treeWalker = GetTreeWalker(elem.AutomationElement);
-            var elementNode = treeWalker.GetFirstChild(elem.AutomationElement);
-            while (elementNode != null)
-            {
-                var uiElement = elementNode.ToUIElement(index);
-                if (compare(uiElement, index))
-                {
-                    return uiElement;
-                }
-
-                index++;
-                elementNode = treeWalker.GetNextSibling(elementNode);
-            }
-            throw new ElementNotAvailableException();
+            return uIElementFinder.FindFollowingSibling(elem, compare);
         }
 
         protected UIElement FindDescendantOrSelf(UIElement elem, CompareFunc compare)
         {
-            if (compare(elem, -1))
-                return elem;
-            return FindDescendant(elem, compare);
+            return uIElementFinder.FindDescendantOrSelf(elem, compare);
         }
 
         public void StartBuild()
@@ -125,10 +71,7 @@ namespace G1ANT.Addon.UI.Api
 
         public object Number(string value)
         {
-            int result = -1;
-            if (int.TryParse(value, out result))
-                return result;
-            throw new NotSupportedException($"Number '{value}' is not supported.");
+            return uIElementFinder.Number(value);
         }
 
         protected object EqOperator(object left, object right)
@@ -157,40 +100,16 @@ namespace G1ANT.Addon.UI.Api
             throw new NotSupportedException("Left side of 'equal' operator has not been recognized.");
         }
 
-        protected object AndOperator(object left, object right)
-        {
-            if (left is CompareFunc cmp1 && right is CompareFunc cmp2)
-            {
-                return new CompareFunc((elem, index) =>
-                {
-                    return cmp1(elem, index) && cmp2(elem, index);
-                });
-            }
-            throw new NotSupportedException("Left or right side of 'and' operator has not been recognized.");
-        }
-
-        protected object OrOperator(object left, object right)
-        {
-            if (left is CompareFunc cmp1 && right is CompareFunc cmp2)
-            {
-                return new CompareFunc((elem, index) =>
-                {
-                    return cmp1(elem, index) || cmp2(elem, index);
-                });
-            }
-            throw new NotSupportedException("Left or right side of 'or' operator has not been recognized.");
-        }
-
         public object Operator(XPathOperator op, object left, object right)
         {
             switch (op)
             {
                 case XPathOperator.Eq:
-                    return EqOperator(left, right);
+                    return uIElementFinder.EqOperator(left, right);
                 case XPathOperator.And:
-                    return AndOperator(left, right);
+                    return uIElementFinder.AndOperator(left, right);
                 case XPathOperator.Or:
-                    return OrOperator(left, right);
+                    return uIElementFinder.OrOperator(left, right);
             }
             throw new NotSupportedException($"Operator {op} is not supported.");
         }
@@ -199,8 +118,17 @@ namespace G1ANT.Addon.UI.Api
         {
             if (nodeType == System.Xml.XPath.XPathNodeType.Element)
             {
-                if (name != "ui")
-                    throw new NotSupportedException($"{name} element is not supported.");
+                switch (name.ToLower())
+                {
+                    case "v2":
+                        uIElementFinder = new XPathUIElementFinderV2();
+                        return (GetElementFunc)((element) => element);
+                    case "ui":
+                        uIElementFinder = uIElementFinder ?? new XPathUIElementFinderV1(Root);
+                        break;
+                    default:
+                        throw new NotSupportedException($"{name} element is not supported.");
+                }
             }
             switch (xpathAxis)
             {
@@ -268,43 +196,7 @@ namespace G1ANT.Addon.UI.Api
 
         public object Function(string prefix, string name, IList<object> args)
         {
-            switch (name.ToLower())
-            {
-                case "starts-with": 
-                case "ends-with": 
-                case "contains":
-                    return BuildStringCompareFunction(name, args);
-            }
-
-            throw new NotSupportedException($"Function {name} is not supported.");
-        }
-
-        private CompareFunc BuildStringCompareFunction(string functionName, IList<object> args)
-        {
-            if (args.Count == 2 && args[0] is string propertyName && args[1] is string text)
-            {
-                CompareFunc func = (elem, index) =>
-                {
-                    if (!elem.IsPropertySupported(propertyName))
-                        return false;
-                    var value = elem.GetPropertyValue(propertyName);
-                    return value is string str && IsConditionMet(functionName, str, text);
-                };
-                return func;
-            }
-            throw new NotSupportedException($"Function {functionName} should has two parameters.");
-        }
-
-        private bool IsConditionMet(string name, string str, string text)
-        {
-            switch (name.ToLower())
-            {
-                case "starts-with": return str.StartsWith(text);
-                case "ends-with": return str.EndsWith(text);
-                case "contains": return str.Contains(text);
-                default: return false;
-
-            }
+            return uIElementFinder.Function(prefix, name, args);
         }
     }
 }
