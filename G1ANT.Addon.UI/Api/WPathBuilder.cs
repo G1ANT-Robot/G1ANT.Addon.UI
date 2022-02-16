@@ -195,13 +195,19 @@ namespace G1ANT.Addon.UI.Api
             return true;
         }
 
+        private bool IsPropertyValueValid(object value)
+        {
+            var str = value?.ToString();
+            return !string.IsNullOrEmpty(str) && !str.Contains("\r\n");
+        }
+
         private Dictionary<string, string> GetPropertiesValues(UIElement element, List<string> propNames)
         {
             var values = new Dictionary<string, string>();
             foreach (var propName in propNames)
             {
                 var val = element.GetPropertyValue(propName);
-                if (!string.IsNullOrEmpty(val?.ToString()))
+                if (IsPropertyValueValid(val))
                     values.Add(propName, val.ToString());
             }
             return values;
