@@ -140,13 +140,13 @@ namespace G1ANT.Addon.UI.Api
                 switch (eventType)
                 {
                     case EventTypes.MouseLeftClick:
-                        Mouse.Click(MouseButton.Left, relative);
+                        Mouse.Click(relative, MouseButton.Left);
                         break;
                     case EventTypes.MouseRightClick:
                         Mouse.RightClick(relative);
                         break;
                     case EventTypes.MouseDoubleClick:
-                        Mouse.DoubleClick(MouseButton.Left, relative);
+                        Mouse.DoubleClick(relative, MouseButton.Left);
                         break;
                 }
             }
