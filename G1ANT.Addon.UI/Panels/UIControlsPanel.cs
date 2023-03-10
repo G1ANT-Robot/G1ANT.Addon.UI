@@ -107,10 +107,8 @@ namespace G1ANT.Addon.UI.Panels
             {
                 if (e.Node.Tag is UIElement element)
                 {
-                    var treeWalker = element.AutomationElement.GetTreeWalker();
-                    var elem = treeWalker.GetFirstChild(element.AutomationElement);
                     var index = 0;
-                    while (elem != null)
+                    foreach (var elem in element.AutomationElement.FindAllChildren())
                     {
                         try
                         {
@@ -123,15 +121,6 @@ namespace G1ANT.Addon.UI.Panels
                         catch (Exception ex)
                         {
                             scripter?.Logger?.Warn($"Cannot display Window Tree item", ex);
-                        }
-
-                        try
-                        {
-                            elem = treeWalker.GetNextSibling(elem);
-                        }
-                        catch
-                        {
-                            elem = null;
                         }
                     }
                 }
@@ -184,8 +173,7 @@ namespace G1ANT.Addon.UI.Panels
                 return element;
             }
 
-            var treeWalker = element.GetTreeWalker();
-            var elementParent = treeWalker.GetParent(element);
+            var elementParent = element.GetParentControl();
             return elementParent.Equals(desktop) ? element : GetTopLevelWindow(elementParent);
         }
 
