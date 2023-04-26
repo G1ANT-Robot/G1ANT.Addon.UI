@@ -173,10 +173,6 @@ namespace G1ANT.Addon.UI.Api
             {
                 (invokePattern as InvokePattern)?.Invoke();
             }
-            else if (AutomationElement.IsPatternSupported(SelectionItemPattern.Pattern) && AutomationElement.Patterns.SelectionItem.TryGetPattern(out var selectionPattern))
-            {
-                (selectionPattern as SelectionItemPattern)?.Select();
-            }
             else if (AutomationElement.TryGetClickablePoint(out var pt))
             {
                 var tempPos = MouseWin32.GetPhysicalCursorPosition();
